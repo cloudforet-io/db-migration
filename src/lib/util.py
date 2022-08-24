@@ -1,8 +1,13 @@
+import logging
+
 import yaml
 import re
 import functools
 import time
-import click
+
+from conf import DEFAULT_LOGGER
+
+_LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 YAML_LOADER = yaml.Loader
 YAML_LOADER.add_implicit_resolver(
@@ -38,6 +43,27 @@ def check_time(func):
         start = time.time()
         func(*args, **kwargs)
         end = time.time()
-        click.echo(f'[Completion] total run time : {end - start:.8f} sec\n')
+        _LOGGER.debug(f'[Total time] {end - start:.8f} sec')
 
     return newFunc
+
+
+def query(func):
+    @functools.wraps(func)
+    def newFunc(*args, **kwargs):
+        _LOGGER.info(f'[EXECUTE] {func.__name__} >>>>>>>>')
+        func(*args, **kwargs)
+        _LOGGER.info(f'[DONE] {func.__name__} >>>>>>>>\n\n')
+
+    return newFunc
+
+
+def deep_merge(from_dict: dict, into_dict: dict) -> dict:
+    for key, value in from_dict.items():
+        if isinstance(value, dict):
+            node = into_dict.setdefault(key, {})
+            deep_merge(value, node)
+        else:
+            into_dict[key] = value
+
+    return into_dict

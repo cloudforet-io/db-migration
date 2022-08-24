@@ -1,8 +1,10 @@
-import click
+import logging
 
-from conf.default_conf import *
+from conf import *
 from lib.util import load_yaml_from_file, check_time
 from pymongo import MongoClient
+
+_LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 class MongoCustomClient(object):
@@ -15,12 +17,12 @@ class MongoCustomClient(object):
             file_conf: dict = load_yaml_from_file(file_path)
             self.batch_size = file_conf.get('BATCH_SIZE')
             self.db_name_map = file_conf.get('DB_NAME_MAP')
-            click.echo('[DB-Migration] Using conf in external yaml')
+            _LOGGER.debug('[Config] conf from external yaml applied')
 
         else:
             self.batch_size = BATCH_SIZE
             self.db_name_map = DB_NAME_MAP
-            click.echo('[DB-Migration] Using default conf')
+            _LOGGER.debug('[Config] conf from default conf')
 
     @check_time
     def update_many(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, q_options: dict = None):
@@ -39,33 +41,32 @@ class MongoCustomClient(object):
     @check_time
     def bulk_write(self, db_name: str, col_name: str, operations: list):
         collection = self._get_collection(db_name, col_name)
-        click.echo(f'[DB-Migration] Execute bulk_write method in {db_name}.{col_name}')
         total_documents_count = len(operations)
         iter_count = total_documents_count // self.batch_size
         if iter_count == 0:
             collection.bulk_write(operations)
-            click.echo(
-                f'[Completion] updated {self.batch_size} / count : {len(operations)} / {total_documents_count}')
+            _LOGGER.debug(
+                f'[DB-Migration] updated {len(operations)} / count : {len(operations)} / {total_documents_count}')
         else:
             updated_count = 0
             while True:
                 if len(operations) <= self.batch_size:
                     updated_count += len(operations)
                     collection.bulk_write(operations)
-                    click.echo(
-                        f'[Completion] updated {len(operations)} / count : {updated_count} / {total_documents_count}')
+                    _LOGGER.debug(
+                        f'[DB-Migration] updated {len(operations)} / count : {updated_count} / {total_documents_count}')
                     break
                 else:
                     collection.bulk_write(operations[:self.batch_size])
                     updated_count += self.batch_size
                     operations = operations[self.batch_size:]
-                    click.echo(
+                    _LOGGER.debug(
                         f'[DB-Migration] updated {self.batch_size} / count : {updated_count} / {total_documents_count}')
 
     def _create_connection_pool(self, connection_uri):
         try:
             self.conn = MongoClient(connection_uri)
-            click.echo('[DB-Migration] DB connection successful')
+            _LOGGER.debug('[Config] DB connection successful')
         except Exception as e:
             raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
 

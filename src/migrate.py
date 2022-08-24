@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 import os
 import click
+import logging
+
+from conf import DEFAULT_LOGGER
+from lib import set_logger
+
+_LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 def _change_version_name(version: str):
@@ -20,8 +26,11 @@ def _get_module(version):
 @click.option('-d', '--debug', help='Enable debug mode')
 def migrate(version, connection_uri, file_path=None, debug=False):
     """Execute DB migration and manage version as code."""
+    set_logger(debug)
+
     if connection_uri is None:
         raise ValueError(f'connection_uri is invalid. (connection_uri={connection_uri})')
+
     module = _get_module(version)
     getattr(module, 'main')(connection_uri, file_path, debug)
 
