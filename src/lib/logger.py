@@ -2,7 +2,7 @@ import logging
 import logging.config
 import copy
 
-from conf.log_conf import *
+from conf.default_conf import *
 from lib.util import deep_merge
 
 __all__ = ['set_logger']
