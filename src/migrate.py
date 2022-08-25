@@ -27,7 +27,7 @@ The contents included in config yml:\n
 @click.option('-f', '--file', 'file_path', type=click.Path(exists=True), help='Config file (YAML)', required=True)
 @click.option('-d', '--debug', is_flag=True, help='Enable debug mode')
 def migrate(version, file_path=None, debug=False):
-    set_logger(debug)
+    set_logger(version, file_path, debug)
 
     module = _get_module(version)
     getattr(module, 'main')(file_path, debug)

@@ -353,7 +353,6 @@ def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClien
 
 @query
 def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
-    print('***** [EXECUTE] inventory_cloud_service_tags_refactoring] ******')
     cloud_services = mongo_client.find('INVENTORY', 'cloud_service', {})
 
     operations = []

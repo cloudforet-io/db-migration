@@ -46,23 +46,13 @@ FORMATTER_DEFAULT_TMPL = {
         'datefmt': '%Y-%m-%dT%H:%M:%S',
     },
     'file': {
-        'format': '{"time": "%(asctime)s.%(msecs)03dZ", "level": "%(levelname)s", "file_name": "%(filename)s", "line": %(lineno)d, "message": %(msg_dump)s}',
+        'format': '{"time": "%(asctime)s.%(msecs)03dZ", "level": "%(levelname)s", "file_name": "%(filename)s", "line": %(lineno)d, "message": %(message)s}',
         'datefmt': '%Y-%m-%dT%H:%M:%S',
     }
-}
-
-_LOGGER = {
-    'version': 1,
-    'formatters': {},
-    'filters': {},
-    'handlers': {
-        'console': HANDLER_DEFAULT_CONSOLE
-    },
-    'loggers': {}
 }
 
 LOGGER_DEFAULT_TMPL = {
     'level': 'INFO',
     'propagate': True,
-    'handlers': ['console']
+    'handlers': ['console', 'file']
 }

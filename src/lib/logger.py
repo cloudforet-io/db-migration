@@ -1,9 +1,10 @@
 import logging
 import logging.config
 import copy
+import os
 
 from conf.default_conf import *
-from lib.util import deep_merge
+from lib.util import load_yaml_from_file, deep_merge
 
 __all__ = ['set_logger']
 
@@ -12,21 +13,27 @@ _LOGGER = {
     'formatters': {},
     'filters': {},
     'handlers': {
-        'console': HANDLER_DEFAULT_CONSOLE
+        'console': HANDLER_DEFAULT_CONSOLE,
+        'file': HANDLER_DEFAULT_FILE
     },
     'loggers': {}
 }
 
 
-def set_logger(debug: bool = False):
-    _set_config(debug)
+def set_logger(version: str, file_path: str = None, debug: bool = False):
+    _set_config(version, file_path, debug)
     logging.config.dictConfig(_LOGGER)
 
 
-def _set_config(debug):
+def _set_config(version, file_path, debug):
     global_log_conf = LOG
+    external_log_dir_path = load_yaml_from_file(file_path).get('LOG_PATH', '')
 
-    _set_default_logger(DEFAULT_LOGGER, debug)
+    _set_default_logger(DEFAULT_LOGGER, version, debug)
+
+    if external_log_dir_path:
+        external_file_path = _set_external_file_path(external_log_dir_path, version)
+        _LOGGER['handlers']['file']['filename'] = external_file_path
 
     if 'loggers' in global_log_conf:
         _set_loggers(global_log_conf['loggers'])
@@ -38,12 +45,31 @@ def _set_config(debug):
         _set_formatters(global_log_conf['formatters'])
 
 
-def _set_default_logger(default_logger, debug):
+def _set_default_logger(default_logger, version, debug):
     _LOGGER['loggers'] = {default_logger: LOGGER_DEFAULT_TMPL}
     _LOGGER['formatters'] = FORMATTER_DEFAULT_TMPL
 
+    _set_default_file_path(version)
+
     if debug:
         _LOGGER['loggers'][DEFAULT_LOGGER]['level'] = 'DEBUG'
+
+
+def _set_default_file_path(version):
+    home = os.path.expanduser("~")
+    log_directory = 'db_migration_log'
+    if not os.path.isdir(os.path.join(home, log_directory)):
+        os.mkdir(os.path.join(home, log_directory))
+
+    file_path = f'{home}/{log_directory}/{version}.log'
+
+    _LOGGER['handlers']['file']['filename'] = file_path
+
+
+def _set_external_file_path(external_file_path, version):
+    if not os.path.isdir(external_file_path):
+        os.mkdir(external_file_path)
+    return f'{external_file_path}/{version}.log'
 
 
 def _set_loggers(loggers):
