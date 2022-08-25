@@ -352,8 +352,7 @@ def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClien
 
 
 @query
-def inventory_cloud_service_tags_refactoring(
-        mongo_client: MongoCustomClient):  # TODO : time / client -> debug function마다는 -> info log (함수명)
+def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
     print('***** [EXECUTE] inventory_cloud_service_tags_refactoring] ******')
     cloud_services = mongo_client.find('INVENTORY', 'cloud_service', {})
 
@@ -389,8 +388,8 @@ def _change_tags(data):
     return new_dict
 
 
-def main(connection_uri, file_path, debug):
-    mongo_client: MongoCustomClient = MongoCustomClient(connection_uri, file_path, debug)
+def main(file_path, debug):
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
 
     # execute migration functions
     # identity service / 9 resources
@@ -436,4 +435,4 @@ def main(connection_uri, file_path, debug):
 
 
 if __name__ == '__main__':
-    main(connection_uri='localhost:27017', file_path=None, debug=False)
+    main(file_path=None, debug=False)

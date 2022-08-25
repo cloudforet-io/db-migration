@@ -13,3 +13,5 @@ DB_NAME_MAP = {
     'CONFIG': 'config',
     'INVENTORY': 'inventory',
 }
+
+CONNECTION_URI = 'localhost:27017'
