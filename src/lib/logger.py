@@ -58,19 +58,23 @@ def _set_default_logger(default_logger, version, debug, external_log_dir_path):
 def _set_default_file_path(version, external_log_dir_path):
     home = os.path.expanduser("~")
     log_directory = 'db_migration_log'
+    file_path = f'{home}/{log_directory}/{version}.log'
     if not external_log_dir_path:
+        if os.path.exists(file_path):
+            raise FileExistsError(f'A previously recorded log file exists. ({file_path})')
         if not os.path.isdir(os.path.join(home, log_directory)):
             os.mkdir(os.path.join(home, log_directory))
-
-    file_path = f'{home}/{log_directory}/{version}.log'
 
     _LOGGER['handlers']['file']['filename'] = file_path
 
 
 def _set_external_file_path(external_file_path, version):
+    file_path = f'{external_file_path}/{version}.log'
+    if os.path.exists(file_path):
+        raise FileExistsError(f'A previously recorded log file exists. ({file_path})')
     if not os.path.isdir(external_file_path):
         os.mkdir(external_file_path)
-    return f'{external_file_path}/{version}.log'
+    return file_path
 
 
 def _set_loggers(loggers):
