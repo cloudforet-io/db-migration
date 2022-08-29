@@ -29,7 +29,7 @@ def _set_config(version, file_path, debug):
     global_log_conf = LOG
     external_log_dir_path = load_yaml_from_file(file_path).get('LOG_PATH', '')
 
-    _set_default_logger(DEFAULT_LOGGER, version, debug)
+    _set_default_logger(DEFAULT_LOGGER, version, debug, external_log_dir_path)
 
     if external_log_dir_path:
         external_file_path = _set_external_file_path(external_log_dir_path, version)
@@ -45,21 +45,22 @@ def _set_config(version, file_path, debug):
         _set_formatters(global_log_conf['formatters'])
 
 
-def _set_default_logger(default_logger, version, debug):
+def _set_default_logger(default_logger, version, debug, external_log_dir_path):
     _LOGGER['loggers'] = {default_logger: LOGGER_DEFAULT_TMPL}
     _LOGGER['formatters'] = FORMATTER_DEFAULT_TMPL
 
-    _set_default_file_path(version)
+    _set_default_file_path(version, external_log_dir_path)
 
     if debug:
         _LOGGER['loggers'][DEFAULT_LOGGER]['level'] = 'DEBUG'
 
 
-def _set_default_file_path(version):
+def _set_default_file_path(version, external_log_dir_path):
     home = os.path.expanduser("~")
     log_directory = 'db_migration_log'
-    if not os.path.isdir(os.path.join(home, log_directory)):
-        os.mkdir(os.path.join(home, log_directory))
+    if not external_log_dir_path:
+        if not os.path.isdir(os.path.join(home, log_directory)):
+            os.mkdir(os.path.join(home, log_directory))
 
     file_path = f'{home}/{log_directory}/{version}.log'
 
