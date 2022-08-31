@@ -11,13 +11,13 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 # identity service
 @query
 def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'project_group', {})
+    items = mongo_client.find('IDENTITY', 'project_group', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'project_group', operations)
@@ -25,13 +25,13 @@ def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'role_binding', {})
+    items = mongo_client.find('IDENTITY', 'role_binding', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'role_binding', operations)
@@ -39,13 +39,13 @@ def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'project', {})
+    items = mongo_client.find('IDENTITY', 'project', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'project', operations)
@@ -53,13 +53,13 @@ def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'user', {})
+    items = mongo_client.find('IDENTITY', 'user', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'user', operations)
@@ -67,13 +67,13 @@ def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'service_account', {})
+    items = mongo_client.find('IDENTITY', 'service_account', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'service_account', operations)
@@ -81,13 +81,13 @@ def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'domain', {})
+    items = mongo_client.find('IDENTITY', 'domain', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'domain', operations)
@@ -95,13 +95,13 @@ def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'role', {})
+    items = mongo_client.find('IDENTITY', 'role', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'role', operations)
@@ -109,13 +109,13 @@ def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'provider', {})
+    items = mongo_client.find('IDENTITY', 'provider', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'provider', operations)
@@ -123,13 +123,13 @@ def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('IDENTITY', 'policy', {})
+    items = mongo_client.find('IDENTITY', 'policy', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('IDENTITY', 'policy', operations)
@@ -138,13 +138,13 @@ def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
 # monitoring service
 @query
 def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('MONITORING', 'data_source', {})
+    items = mongo_client.find('MONITORING', 'data_source', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('MONITORING', 'data_source', operations)
@@ -153,13 +153,13 @@ def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
 # statistic service
 @query
 def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('STATISTICS', 'schedule', {})
+    items = mongo_client.find('STATISTICS', 'schedule', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('STATISTICS', 'schedule', operations)
@@ -168,13 +168,13 @@ def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
 # secret service
 @query
 def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('SECRET', 'secret', {})
+    items = mongo_client.find('SECRET', 'secret', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('SECRET', 'secret', operations)
@@ -182,13 +182,13 @@ def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('SECRET', 'secret_group', {})
+    items = mongo_client.find('SECRET', 'secret_group', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('SECRET', 'secret_group', operations)
@@ -197,13 +197,13 @@ def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
 # repository service
 @query
 def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('REPOSITORY', 'schema', {})
+    items = mongo_client.find('REPOSITORY', 'schema', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('REPOSITORY', 'schema', operations)
@@ -211,13 +211,13 @@ def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('REPOSITORY', 'plugin', {})
+    items = mongo_client.find('REPOSITORY', 'plugin', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('REPOSITORY', 'plugin', operations)
@@ -225,13 +225,13 @@ def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('REPOSITORY', 'policy', {})
+    items = mongo_client.find('REPOSITORY', 'policy', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('REPOSITORY', 'policy', operations)
@@ -239,13 +239,13 @@ def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('PLUGIN', 'supervisor', {})
+    items = mongo_client.find('PLUGIN', 'supervisor', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('PLUGIN', 'supervisor', operations)
@@ -254,13 +254,13 @@ def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
 # config service
 @query
 def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('CONFIG', 'user_config', {})
+    items = mongo_client.find('CONFIG', 'user_config', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('CONFIG', 'user_config', operations)
@@ -268,13 +268,13 @@ def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('CONFIG', 'domain_config', {})
+    items = mongo_client.find('CONFIG', 'domain_config', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('CONFIG', 'domain_config', operations)
@@ -283,13 +283,13 @@ def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
 # inventory service
 @query
 def inventory_server_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'server', {})
+    items = mongo_client.find('INVENTORY', 'server', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'server', operations)
@@ -297,13 +297,13 @@ def inventory_server_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'resource_group', {})
+    items = mongo_client.find('INVENTORY', 'resource_group', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'resource_group', operations)
@@ -311,13 +311,13 @@ def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'region', {})
+    items = mongo_client.find('INVENTORY', 'region', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'region', operations)
@@ -325,13 +325,13 @@ def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'collector', {})
+    items = mongo_client.find('INVENTORY', 'collector', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'collector', operations)
@@ -339,13 +339,13 @@ def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'cloud_service_type', {})
+    items = mongo_client.find('INVENTORY', 'cloud_service_type', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'cloud_service_type', operations)
@@ -353,13 +353,13 @@ def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClien
 
 @query
 def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
-    cloud_services = mongo_client.find('INVENTORY', 'cloud_service', {})
+    items = mongo_client.find('INVENTORY', 'cloud_service', {})
 
     operations = []
-    for cloud_service in cloud_services:
-        if isinstance(cloud_service['tags'], list):
+    for item in items:
+        if isinstance(item['tags'], list):
             operations.append(
-                UpdateOne({'_id': cloud_service['_id']}, {"$set": {"tags": _change_tags(cloud_service['tags'])}})
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
             )
 
     mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
