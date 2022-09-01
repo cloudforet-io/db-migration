@@ -383,7 +383,7 @@ def _change_tags(data):
         return data
     if isinstance(data, list):
         for index in range(len(data)):
-            new_dict[data[index]["key"]] = data[index]["value"]
+            new_dict[data[index]["key"]] = data[index].get("value", "")
     return new_dict
 
 
