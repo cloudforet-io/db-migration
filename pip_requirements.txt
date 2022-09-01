@@ -1,3 +1,4 @@
 pymongo
 click
 PyYAML
+dnspython

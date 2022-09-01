@@ -41,23 +41,26 @@ class MongoCustomClient(object):
 
     @check_time
     def bulk_write(self, db_name: str, col_name: str, operations: list):
-        collection = self._get_collection(db_name, col_name)
-        total_operations_count = len(operations)
-        iter_count = (total_operations_count // self.batch_size) + 1
+        if len(operations) > 0:
+            collection = self._get_collection(db_name, col_name)
+            total_operations_count = len(operations)
+            iter_count = (total_operations_count // self.batch_size) + 1
 
-        updated_count = 0
-        for operated_count in range(iter_count):
-            if len(operations) <= self.batch_size:
-                collection.bulk_write(operations)
-                updated_count += len(operations)
-                _LOGGER.debug(
-                    f'[DB-Migration] Operated {len(operations)} / count : {updated_count} / {total_operations_count}')
-            else:
-                collection.bulk_write(operations[:self.batch_size])
-                operations = operations[self.batch_size:]
-                updated_count += self.batch_size
-                _LOGGER.debug(
-                    f'[DB-Migration] Operated {self.batch_size} / count : {updated_count} / {total_operations_count}')
+            updated_count = 0
+            for operated_count in range(iter_count):
+                if len(operations) <= self.batch_size:
+                    collection.bulk_write(operations)
+                    updated_count += len(operations)
+                    _LOGGER.debug(
+                        f'[DB-Migration] Operated {len(operations)} / count : {updated_count} / {total_operations_count}')
+                else:
+                    collection.bulk_write(operations[:self.batch_size])
+                    operations = operations[self.batch_size:]
+                    updated_count += self.batch_size
+                    _LOGGER.debug(
+                        f'[DB-Migration] Operated {self.batch_size} / count : {updated_count} / {total_operations_count}')
+        else:
+            _LOGGER.debug(f'There is no operations')
 
     def _create_connection_pool(self):
         if self.file_conf:
