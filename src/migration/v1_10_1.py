@@ -282,20 +282,6 @@ def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
 
 # inventory service
 @query
-def inventory_server_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'server', {})
-
-    operations = []
-    for item in items:
-        if isinstance(item['tags'], list):
-            operations.append(
-                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
-            )
-
-    mongo_client.bulk_write('INVENTORY', 'server', operations)
-
-
-@query
 def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'resource_group', {})
 
@@ -424,8 +410,7 @@ def main(file_path, debug):
     config_user_config_tags_refactoring(mongo_client)
     config_domain_config_tags_refactoring(mongo_client)
 
-    # inventory service / 6 resources
-    inventory_server_tags_refactoring(mongo_client)
+    # inventory service / 5 resources
     inventory_resource_group_tags_refactoring(mongo_client)
     inventory_region_tags_refactoring(mongo_client)
     inventory_collector_tags_refactoring(mongo_client)
