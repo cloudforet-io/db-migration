@@ -11,7 +11,7 @@ _help = """
 Execute DB migration based on the {version}.py file located in the migration folder.\
  Users can manage version history for DB migration.\n
 Example usages:\n
-    migrate.py [-f <config_yml_path>] [-d]\n
+    migrate.py version [-f <config_yml_path>] [-d]\n
 The contents included in config yml:\n
     - BATCH_SIZE (type: int)\n
         A number of rows to be sent as a batch to the database\n
