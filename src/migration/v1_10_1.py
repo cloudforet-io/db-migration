@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 # identity service
 @query
 def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'project_group', {})
+    items = mongo_client.find('IDENTITY', 'project_group', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -25,7 +25,7 @@ def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'role_binding', {})
+    items = mongo_client.find('IDENTITY', 'role_binding', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -39,7 +39,7 @@ def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'project', {})
+    items = mongo_client.find('IDENTITY', 'project', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -53,7 +53,7 @@ def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'user', {})
+    items = mongo_client.find('IDENTITY', 'user', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -67,7 +67,7 @@ def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'service_account', {})
+    items = mongo_client.find('IDENTITY', 'service_account', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -81,7 +81,7 @@ def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'domain', {})
+    items = mongo_client.find('IDENTITY', 'domain', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -95,7 +95,7 @@ def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'role', {})
+    items = mongo_client.find('IDENTITY', 'role', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -109,7 +109,7 @@ def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'provider', {})
+    items = mongo_client.find('IDENTITY', 'provider', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -123,7 +123,7 @@ def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('IDENTITY', 'policy', {})
+    items = mongo_client.find('IDENTITY', 'policy', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -138,7 +138,7 @@ def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
 # monitoring service
 @query
 def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('MONITORING', 'data_source', {})
+    items = mongo_client.find('MONITORING', 'data_source', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -153,7 +153,7 @@ def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
 # statistic service
 @query
 def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('STATISTICS', 'schedule', {})
+    items = mongo_client.find('STATISTICS', 'schedule', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -168,7 +168,7 @@ def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
 # secret service
 @query
 def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('SECRET', 'secret', {})
+    items = mongo_client.find('SECRET', 'secret', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -182,7 +182,7 @@ def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('SECRET', 'secret_group', {})
+    items = mongo_client.find('SECRET', 'secret_group', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -197,7 +197,7 @@ def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
 # repository service
 @query
 def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('REPOSITORY', 'schema', {})
+    items = mongo_client.find('REPOSITORY', 'schema', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -211,7 +211,7 @@ def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('REPOSITORY', 'plugin', {})
+    items = mongo_client.find('REPOSITORY', 'plugin', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -225,7 +225,7 @@ def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('REPOSITORY', 'policy', {})
+    items = mongo_client.find('REPOSITORY', 'policy', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -239,7 +239,7 @@ def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('PLUGIN', 'supervisor', {})
+    items = mongo_client.find('PLUGIN', 'supervisor', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -254,7 +254,7 @@ def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
 # config service
 @query
 def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('CONFIG', 'user_config', {})
+    items = mongo_client.find('CONFIG', 'user_config', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -268,7 +268,7 @@ def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('CONFIG', 'domain_config', {})
+    items = mongo_client.find('CONFIG', 'domain_config', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -283,7 +283,7 @@ def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
 # inventory service
 @query
 def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'resource_group', {})
+    items = mongo_client.find('INVENTORY', 'resource_group', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -297,7 +297,7 @@ def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'region', {})
+    items = mongo_client.find('INVENTORY', 'region', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -311,7 +311,7 @@ def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'collector', {})
+    items = mongo_client.find('INVENTORY', 'collector', {}, {'tags': 1})
 
     operations = []
     for item in items:
@@ -325,7 +325,7 @@ def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
 
 @query
 def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'cloud_service_type', {})
+    items = mongo_client.find('INVENTORY', 'cloud_service_type', {}, {'tags': 1})
 
     operations = []
     for item in items:
