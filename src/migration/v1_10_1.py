@@ -337,20 +337,6 @@ def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClien
     mongo_client.bulk_write('INVENTORY', 'cloud_service_type', operations)
 
 
-@query
-def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'cloud_service', {}, {'tags': 1})
-
-    operations = []
-    for item in items:
-        if isinstance(item['tags'], list):
-            operations.append(
-                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
-            )
-
-    mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
-
-
 def _change_tags(data):
     """ convert tags type ( list of dict -> dict )
     [AS-IS]
@@ -410,12 +396,11 @@ def main(file_path, debug):
     config_user_config_tags_refactoring(mongo_client)
     config_domain_config_tags_refactoring(mongo_client)
 
-    # inventory service / 5 resources
+    # inventory service / 4 resources
     inventory_resource_group_tags_refactoring(mongo_client)
     inventory_region_tags_refactoring(mongo_client)
     inventory_collector_tags_refactoring(mongo_client)
     inventory_cloud_service_type_tags_refactoring(mongo_client)
-    inventory_cloud_service_tags_refactoring(mongo_client)
 
 
 if __name__ == '__main__':
