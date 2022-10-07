@@ -40,7 +40,7 @@ def inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_cli
 @query
 def identity_service_account_set_additional_fields(mongo_client: MongoCustomClient):
     mongo_client.update_many('IDENTITY', 'service_account', {'service_account_type': {'$ne': 'TRUSTED'}},
-                             {'$set': {'service_account_type': 'GENERAL', 'scope': 'PROJECT'}})
+                             {'$set': {'service_account_type': 'GENERAL', 'scope': 'PROJECT'}}, upsert=True)
 
 
 @query
@@ -85,7 +85,7 @@ def _change_tags_to_list_of_dict(dict_values: dict, provider: str) -> list:
 
 def main(file_path, debug):
     mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
-    inventory_cloud_service_tags_refactoring(mongo_client)
-    inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_client)
+    # inventory_cloud_service_tags_refactoring(mongo_client)
+    # inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_client)
     identity_service_account_set_additional_fields(mongo_client)
     file_manager_file_delete_all_files(mongo_client)
