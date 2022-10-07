@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from conf import *
@@ -34,6 +35,11 @@ class MongoCustomClient(object):
     def update_one(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, q_options: dict = None):
         collection = self._get_collection(db_name, col_name)
         collection.update_one(q_filter, q_update, q_options)
+
+    @check_time
+    def delete_many(self, db_name: str, col_name: str, q_filter: dict, q_options: dict = None):
+        collection = self._get_collection(db_name, col_name)
+        collection.delete_many(q_filter, q_options)
 
     def find(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
         collection = self._get_collection(db_name, col_name)
