@@ -40,7 +40,7 @@ def inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_cli
 @query
 def identity_service_account_set_additional_fields(mongo_client: MongoCustomClient):
     mongo_client.update_many('IDENTITY', 'service_account', {"service_account_type": {"$ne": "TRUSTED"}},
-                             {"$set": {'service_account_type': 'GENERAL', 'scope': 'PROJECT'}}, {"upsert": True})
+                             {"$set": {'service_account_type': 'GENERAL', 'scope': 'PROJECT'}}, upsert=True)
 
 
 @query
