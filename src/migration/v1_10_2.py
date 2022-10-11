@@ -1,6 +1,6 @@
 import logging
 from conf import DEFAULT_LOGGER
-from pymongo import UpdateOne
+from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
 from lib.util import query
 
@@ -48,6 +48,45 @@ def file_manager_file_delete_all_files(mongo_client: MongoCustomClient):
     mongo_client.delete_many('FILE_MANAGER', 'file', {})
 
 
+@query
+def inventory_record_delete_wrong_records(mongo_client: MongoCustomClient):
+    cloud_service_ids = []
+    items = mongo_client.find('INVENTORY', 'cloud_service',
+                              {'provider': 'aws', 'cloud_service_group': 'IAM', 'cloud_service_type': 'Policy'},
+                              {'cloud_service_id': 1})
+    for item in items:
+        cloud_service_ids.append(item['cloud_service_id'])
+
+    items = mongo_client.find('INVENTORY', 'cloud_service',
+                              {'provider': 'aws', 'cloud_service_group': 'IAM', 'cloud_service_type': 'Group'},
+                              {'cloud_service_id': 1})
+    for item in items:
+        cloud_service_ids.append(item['cloud_service_id'])
+
+    items = mongo_client.find('INVENTORY', 'cloud_service',
+                              {'provider': 'aws', 'cloud_service_group': 'EKS', 'cloud_service_type': 'Cluster'},
+                              {'cloud_service_id': 1})
+    for item in items:
+        cloud_service_ids.append(item['cloud_service_id'])
+
+    items = mongo_client.find('INVENTORY', 'cloud_service',
+                              {'provider': 'aws', 'cloud_service_group': 'EKS', 'cloud_service_type': 'NodeGroup'},
+                              {'cloud_service_id': 1})
+    for item in items:
+        cloud_service_ids.append(item['cloud_service_id'])
+
+    operations = []
+    cloud_service_ids = list(set(cloud_service_ids))
+
+    items = mongo_client.find('INVENTORY', 'record', {'cloud_service_id': {'$in': cloud_service_ids}}, {'_id': 1})
+    for item in items:
+        operations.append(
+            DeleteOne({'_id': item['_id']})
+        )
+
+    mongo_client.bulk_write('INVENTORY', 'record', operations)
+
+
 def _change_tags(data):
     """ convert tags type ( list of dict -> dict )
     [AS-IS]
@@ -89,3 +128,4 @@ def main(file_path, debug):
     inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_client)
     identity_service_account_set_additional_fields(mongo_client)
     file_manager_file_delete_all_files(mongo_client)
+    inventory_record_delete_wrong_records(mongo_client)
