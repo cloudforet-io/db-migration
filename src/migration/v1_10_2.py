@@ -75,6 +75,12 @@ def inventory_record_delete_wrong_records(mongo_client: MongoCustomClient):
     for item in items:
         cloud_service_ids.append(item['cloud_service_id'])
 
+    items = mongo_client.find('INVENTORY', 'cloud_service',
+                              {'provider': 'aws', 'cloud_service_group': 'DirectConnect', 'cloud_service_type': 'DirectConnectGateway'},
+                              {'cloud_service_id': 1})
+    for item in items:
+        cloud_service_ids.append(item['cloud_service_id'])
+
     operations = []
     cloud_service_ids = list(set(cloud_service_ids))
 
