@@ -67,6 +67,26 @@ class MongoCustomClient(object):
         else:
             _LOGGER.debug(f'There is no operations')
 
+    def get_indexes(self, db_name: str, col_name: str, comment=None):
+        collection = self._get_collection(db_name, col_name)
+        indexes = collection.index_information(comment=comment)
+
+        results = []
+        for raw_index in indexes:
+            items = indexes[raw_index]['key']
+
+            index = {
+                'name': raw_index,
+                'v': indexes[raw_index]['v'],
+                'key': self._create_index_key(items)
+            }
+            results.append(index)
+        return results
+
+    def drop_indexes(self, db_name: str, col_name: str, comment=None):
+        collection = self._get_collection(db_name, col_name)
+        return collection.drop_indexes(comment=comment)
+
     def _create_connection_pool(self):
         if self.file_conf:
             connection_uri = self.file_conf.get('CONNECTION_URI')
@@ -94,3 +114,10 @@ class MongoCustomClient(object):
             raise ValueError(f'Dose not found collection. (db = {db_name}, collection = {col_name})')
 
         return self.conn[db_name][col_name]
+
+    @staticmethod
+    def _create_index_key(items):
+        key = {}
+        for col_key, col_value in items:
+            key[col_key] = col_value
+        return key
