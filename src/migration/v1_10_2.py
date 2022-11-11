@@ -44,6 +44,13 @@ def identity_service_account_set_additional_fields(mongo_client: MongoCustomClie
 
 
 @query
+def identity_provider_delete_providers(mongo_client: MongoCustomClient):
+    mongo_client.delete_many('IDENTITY', 'provider', {"provider": "aws"})
+    mongo_client.delete_many('IDENTITY', 'provider', {"provider": "google_cloud"})
+    mongo_client.delete_many('IDENTITY', 'provider', {"provider": "aws"})
+
+
+@query
 def file_manager_file_delete_all_files(mongo_client: MongoCustomClient):
     mongo_client.delete_many('FILE_MANAGER', 'file', {})
 
