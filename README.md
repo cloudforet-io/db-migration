@@ -89,7 +89,7 @@ DB_NAME_MAP:
   - **Standard Connection URL**
     - String URI Format follows MongoDB standard. Please refer to the following URL for more information.  
     - [Settings guide of standard connection URL](https://www.mongodb.com/docs/manual/reference/connection-string/#connection-string-uri-format)
-  - Connection URL of DocumentDB
+  - **Connection URL of DocumentDB**
     - [Settings guide of DocumentDB connection URL](https://docs.aws.amazon.com/documentdb/latest/developerguide/connect_programmatically.html)
     - The code below is an example of a Connection URL that supports TLS and connects to an Amazon DocumentDB cluster.
       ```
