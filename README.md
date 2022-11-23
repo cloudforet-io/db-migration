@@ -85,9 +85,18 @@ DB_NAME_MAP:
     INVENTORY: dev-inventory
 ```
 
-- `CONNECTION_URI` : Connection String URI Format  
-  - String URI Format follows MongoDB standard. Please refer to the following URL for more information.  
-  - https://www.mongodb.com/docs/manual/reference/connection-string/#connection-string-uri-format  
+- `CONNECTION_URI` : Connection String URI Format
+  - **Standard Connection URL**
+    - String URI Format follows MongoDB standard. Please refer to the following URL for more information.  
+    - [Settings guide of standard connection URL](https://www.mongodb.com/docs/manual/reference/connection-string/#connection-string-uri-format)
+  - Connection URL of DocumentDB
+    - [Settings guide of DocumentDB connection URL](https://docs.aws.amazon.com/documentdb/latest/developerguide/connect_programmatically.html)
+    - The code below is an example of a Connection URL that supports TLS and connects to an Amazon DocumentDB cluster.
+      ```
+        'mongodb://<sample-user>:<password>@sample-cluster.node.us-east-1.docdb.amazonaws.com:27017/?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false'
+      ```
+    
+
 - `BATCH_SIZE` : This parameter is used when using the bulk_write method.  
 - `LOG_PATH` : It corresponds to the location of the log file that occurs in DB-migration.  
 - `DB_NAME_MAP` : Used as a DB wrapper that maps aliases to real names. In real MongoDB, IDENTITY has the name dev-identity.
