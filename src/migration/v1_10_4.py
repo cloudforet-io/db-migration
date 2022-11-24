@@ -51,6 +51,16 @@ def inventory_record_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'record')
 
 
+@query
+def inventory_cloud_service_type_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes('INVENTORY', 'cloud_service_type')
+
+
+@query
+def inventory_region_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes('INVENTORY', 'region')
+
+
 def main(file_path, debug):
     mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
 
@@ -61,3 +71,5 @@ def main(file_path, debug):
     inventory_cloud_service_tag_drop_indexes(mongo_client)
     inventory_collection_state_drop_indexes(mongo_client)
     inventory_record_drop_indexes(mongo_client)
+    inventory_cloud_service_type_drop_indexes(mongo_client)
+    inventory_region_drop_indexes(mongo_client)
