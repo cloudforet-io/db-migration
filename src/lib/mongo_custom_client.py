@@ -34,10 +34,10 @@ class MongoCustomClient(object):
             collection.update_many(q_filter, q_update, upsert)
 
     @check_time
-    def update_one(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, q_options: dict = None):
+    def update_one(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
-            collection.update_one(q_filter, q_update, q_options)
+            collection.update_one(q_filter, q_update, upsert)
 
     @check_time
     def delete_many(self, db_name: str, col_name: str, q_filter: dict, q_options: dict = None):
