@@ -238,6 +238,49 @@ def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 @query
+def portal_repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
+    items = mongo_client.find('PORTAL-REPOSITORY', 'schema', {}, {'tags': 1})
+
+    operations = []
+    for item in items:
+        if isinstance(item['tags'], list):
+            operations.append(
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
+            )
+
+    mongo_client.bulk_write('PORTAL-REPOSITORY', 'schema', operations)
+
+
+# Marketplace
+@query
+def portal_repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
+    items = mongo_client.find('PORTAL-REPOSITORY', 'plugin', {}, {'tags': 1})
+
+    operations = []
+    for item in items:
+        if isinstance(item['tags'], list):
+            operations.append(
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
+            )
+
+    mongo_client.bulk_write('PORTAL-REPOSITORY', 'plugin', operations)
+
+
+@query
+def portal_repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
+    items = mongo_client.find('PORTAL-REPOSITORY', 'policy', {}, {'tags': 1})
+
+    operations = []
+    for item in items:
+        if isinstance(item['tags'], list):
+            operations.append(
+                UpdateOne({'_id': item['_id']}, {"$set": {"tags": _change_tags(item['tags'])}})
+            )
+
+    mongo_client.bulk_write('PORTAL-REPOSITORY', 'policy', operations)
+
+
+@query
 def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('PLUGIN', 'supervisor', {}, {'tags': 1})
 
@@ -388,6 +431,11 @@ def main(file_path, debug):
     repository_schema_tags_refactoring(mongo_client)
     repository_plugin_tags_refactoring(mongo_client)
     repository_policy_tags_refactoring(mongo_client)
+
+    # remote repository service / 3 resources
+    portal_repository_schema_tags_refactoring(mongo_client)
+    portal_repository_plugin_tags_refactoring(mongo_client)
+    portal_repository_policy_tags_refactoring(mongo_client)
 
     # plugin service / 1 resource
     plugin_supervisor_tags_refactoring(mongo_client)
