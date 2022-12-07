@@ -27,13 +27,17 @@ class MongoCustomClient(object):
             _LOGGER.debug('[Config] conf from default conf')
         self._create_connection_pool()
 
+    def insert_many(self, db_name: str, col_name: str, records, is_new):
+        collection = self._get_collection(db_name, col_name, is_new)
+        if isinstance(collection, pymongo.collection.Collection):
+            collection.insert_many(records)
+
     @check_time
     def update_many(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
             collection.update_many(q_filter, q_update, upsert)
 
-    @check_time
     def update_one(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -49,6 +53,13 @@ class MongoCustomClient(object):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
             return collection.find(q_filter, projection)
+        else:
+            return []
+
+    def aggregate(self, db_name: str, col_name: str, pipeline: list):
+        collection = self._get_collection(db_name, col_name)
+        if isinstance(collection, pymongo.collection.Collection):
+            return collection.aggregate(pipeline)
         else:
             return []
 
@@ -98,6 +109,11 @@ class MongoCustomClient(object):
         if isinstance(collection, pymongo.collection.Collection):
             return collection.drop_indexes(comment=comment)
 
+    def drop_collection(self, db_name: str, col_name: str):
+        collection = self._get_collection(db_name, col_name)
+        if isinstance(collection, pymongo.collection.Collection):
+            return collection.drop()
+
     def _create_connection_pool(self):
         if self.file_conf:
             connection_uri = self.file_conf.get('CONNECTION_URI')
@@ -110,7 +126,7 @@ class MongoCustomClient(object):
         self.conn = MongoClient(connection_uri)
         _LOGGER.debug('[Config] DB connection successful')
 
-    def _get_collection(self, db: str, col_name: str) -> [pymongo.collection.Collection, None]:
+    def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
         try:
             db_name = self.db_name_map.get(db)
 
@@ -121,9 +137,10 @@ class MongoCustomClient(object):
             if db_name not in db_names:
                 raise ValueError(f'Does not found database. (db = {db_name})')
 
-            col_names = self.conn[db_name].list_collection_names()
-            if col_name not in col_names:
-                raise ValueError(f'Dose not found collection. (db = {db_name}, collection = {col_name})')
+            if not is_new:
+                col_names = self.conn[db_name].list_collection_names()
+                if col_name not in col_names:
+                    raise ValueError(f'Dose not found collection. (db = {db_name}, collection = {col_name})')
             return self.conn[db_name][col_name]
 
         except Exception as e:
