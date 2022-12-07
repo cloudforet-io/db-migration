@@ -114,6 +114,11 @@ class MongoCustomClient(object):
         if isinstance(collection, pymongo.collection.Collection):
             return collection.drop()
 
+    def distinct(self, db_name: str, col_name: str, key: str):
+        collection = self._get_collection(db_name, col_name)
+        if isinstance(collection, pymongo.collection.Collection):
+            return collection.distinct(key)
+
     def _create_connection_pool(self):
         if self.file_conf:
             connection_uri = self.file_conf.get('CONNECTION_URI')

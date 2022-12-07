@@ -15,13 +15,7 @@ def monitoring_alert_number_remove_collection(mongo_client: MongoCustomClient):
 
 @query
 def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCustomClient):
-    pipelines = [
-        {"$group": {"_id": "$domain_id"}}
-    ]
-
-    domain_ids = []
-    for item in mongo_client.aggregate('MONITORING', 'alert', pipelines):
-        domain_ids.append(item['_id'])
+    domain_ids = mongo_client.distinct('MONITORING', 'alert', 'domain_id')
 
     records = []
     for domain_id in domain_ids:
@@ -42,10 +36,6 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 
         _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {number})")
 
-    _monitoring_alert_number_create_collection(mongo_client, records)
-
-
-def _monitoring_alert_number_create_collection(mongo_client: MongoCustomClient, records):
     mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
 
 
