@@ -24,15 +24,16 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 
         if alerts:
             alert_number = 0
+            operations = []
             for number, alert in enumerate(alerts, 1):
-                mongo_client.update_one('MONITORING', 'alert', {"_id": alert["_id"]},
-                                        {"$set": {
-                                            "alert_number": number,
-                                            "alert_number_str": str(number)
-                                        }}, upsert=True)
+                operations.append(
+                    UpdateOne({'_id': alert['_id']}, {"$set": {"alert_number": number,
+                                                               "alert_number_str": str(number)}})
+                )
                 alert_number = number
 
             records.append({"domain_id": domain_id, "next": alert_number})
+            mongo_client.bulk_write('MONITORING', 'alert', operations)
 
         _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {number})")
 
