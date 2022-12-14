@@ -9,26 +9,30 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @query
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'record', {}, {'project_id': 1})
+    domains = mongo_client.find('IDENTITY', 'domain', {}, {'domain_id': 1})
+    for domain in domains:
+        items = mongo_client.find('INVENTORY', 'record', {'domain_id': domain['domain_id']}, {})
 
-    operations = []
-    for item in items:
-        operations.append(
-            UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
-        )
-    mongo_client.bulk_write('INVENTORY', 'record', operations)
+        operations = []
+        for item in items:
+            operations.append(
+                UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
+            )
+        mongo_client.bulk_write('INVENTORY', 'record', operations)
 
 
 @query
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
-    items = mongo_client.find('INVENTORY', 'cloud_service_tag', {}, {'project_id': 1})
+    domains = mongo_client.find('IDENTITY', 'domain', {}, {'domain_id': 1})
+    for domain in domains:
+        items = mongo_client.find('INVENTORY', 'cloud_service_tag', {'domain_id': domain['domain_id']}, {})
 
-    operations = []
-    for item in items:
-        operations.append(
-            UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
-        )
-    mongo_client.bulk_write('INVENTORY', 'cloud_service_tag', operations)
+        operations = []
+        for item in items:
+            operations.append(
+                UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
+            )
+        mongo_client.bulk_write('INVENTORY', 'cloud_service_tag', operations)
 
 
 @query
