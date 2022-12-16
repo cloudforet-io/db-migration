@@ -12,14 +12,16 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {'_id': 1}):
-        operations = []
+        query_filter = {
+            '_id': {
+                '$in': []
+            }
+        }
         for item in items:
-            operations.append(
-                UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
-            )
+            query_filter['_id']['$in'].append(item['_id'])
             item_count += 1
 
-        mongo_client.bulk_write('INVENTORY', 'record', operations)
+        mongo_client.update_many('INVENTORY', 'record', query_filter, {"$unset": {"project_id": ""}}, upsert=True)
         _LOGGER.debug(f'Total Count : {item_count}')
 
 
@@ -28,14 +30,17 @@ def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {'_id': 1}):
-        operations = []
+        query_filter = {
+            '_id': {
+                '$in': []
+            }
+        }
         for item in items:
-            operations.append(
-                UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
-            )
+            query_filter['_id']['$in'].append(item['_id'])
             item_count += 1
 
-        mongo_client.bulk_write('INVENTORY', 'cloud_service_tag', operations)
+        mongo_client.update_many('INVENTORY', 'cloud_service_tag', query_filter, {"$unset": {"project_id": ""}},
+                                 upsert=True)
         _LOGGER.debug(f'Total Count : {item_count}')
 
 

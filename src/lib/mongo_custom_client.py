@@ -35,7 +35,6 @@ class MongoCustomClient(object):
         if isinstance(collection, pymongo.collection.Collection):
             collection.insert_many(records)
 
-    @check_time
     def update_many(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
