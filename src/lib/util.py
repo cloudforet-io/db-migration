@@ -43,7 +43,7 @@ def check_time(func):
         start = time.time()
         func(*args, **kwargs)
         end = time.time()
-        _LOGGER.debug(f'[Total time] {end - start:.8f} sec')
+        _LOGGER.debug(f'[Total time] {end - start:.2f} sec')
 
     return newFunc
 
