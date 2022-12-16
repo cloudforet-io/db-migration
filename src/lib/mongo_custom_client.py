@@ -143,7 +143,7 @@ class MongoCustomClient(object):
         if connection_uri is None:
             raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
 
-        self.conn = MongoClient(connection_uri)
+        self.conn = MongoClient(connection_uri, readPreference='primary')
         _LOGGER.debug('[Config] DB connection successful')
 
     def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
