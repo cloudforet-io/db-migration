@@ -2,37 +2,41 @@ import logging
 from conf import DEFAULT_LOGGER
 from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import query, check_time
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 @query
+@check_time
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
-    domains = mongo_client.find('IDENTITY', 'domain', {}, {'domain_id': 1})
-    for domain in domains:
-        items = mongo_client.find('INVENTORY', 'record', {'domain_id': domain['domain_id']}, {})
-
+    item_count = 0
+    for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {}):
         operations = []
         for item in items:
             operations.append(
                 UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
             )
+            item_count += 1
+
         mongo_client.bulk_write('INVENTORY', 'record', operations)
+        _LOGGER.debug(f'Total Count : {item_count}')
 
 
 @query
+@check_time
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
-    domains = mongo_client.find('IDENTITY', 'domain', {}, {'domain_id': 1})
-    for domain in domains:
-        items = mongo_client.find('INVENTORY', 'cloud_service_tag', {'domain_id': domain['domain_id']}, {})
-
+    item_count = 0
+    for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {}):
         operations = []
         for item in items:
             operations.append(
                 UpdateOne({'_id': item['_id']}, {"$unset": {"project_id": ""}})
             )
+            item_count += 1
+
         mongo_client.bulk_write('INVENTORY', 'cloud_service_tag', operations)
+        _LOGGER.debug(f'Total Count : {item_count}')
 
 
 @query

@@ -1,4 +1,5 @@
 import logging
+import math
 
 import pymongo.collection
 
@@ -64,12 +65,12 @@ class MongoCustomClient(object):
         collection = self._get_collection(db_name, col_name)
 
         if isinstance(collection, pymongo.collection.Collection):
-            total_count = collection.count_documents({})
-            last_page_num = (total_count // self.page_size) + 1
+            total_count = collection.count_documents(q_filter)
+            page_count = math.ceil(total_count / self.page_size)
 
-            for page_num in range(1, last_page_num + 1):
-                skip_argument = (page_num - 1) * self.page_size
-                yield collection.find(q_filter, projection).skip(skip_argument).limit(self.page_size)
+            for page_num in range(page_count):
+                skip_size = page_num * self.page_size
+                yield collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
 
     def aggregate(self, db_name: str, col_name: str, pipeline: list):
         collection = self._get_collection(db_name, col_name)
@@ -78,27 +79,22 @@ class MongoCustomClient(object):
         else:
             return []
 
-    @check_time
     def bulk_write(self, db_name: str, col_name: str, operations: list):
         if len(operations) > 0:
             collection = self._get_collection(db_name, col_name)
             if isinstance(collection, pymongo.collection.Collection):
-                total_operations_count = len(operations)
-                iter_count = (total_operations_count // self.batch_size) + 1
+                total_operation_count = len(operations)
+                batch_count = math.ceil(total_operation_count / self.batch_size)
 
-                updated_count = 0
-                for operated_count in range(iter_count):
-                    if len(operations) <= self.batch_size:
-                        collection.bulk_write(operations)
-                        updated_count += len(operations)
-                        _LOGGER.debug(
-                            f'[DB-Migration] Operated {len(operations)} / count : {updated_count} / {total_operations_count}')
-                    else:
-                        collection.bulk_write(operations[:self.batch_size])
-                        operations = operations[self.batch_size:]
-                        updated_count += self.batch_size
-                        _LOGGER.debug(
-                            f'[DB-Migration] Operated {self.batch_size} / count : {updated_count} / {total_operations_count}')
+                operated_count = 0
+                for batch_num in range(batch_count):
+                    start = batch_num * self.batch_size
+                    end = start + self.batch_size
+                    seperated_operations = operations[start:end]
+                    collection.bulk_write(seperated_operations)
+                    operated_count += len(seperated_operations)
+                    _LOGGER.debug(
+                        f'[DB-Migration] Operated Count : ({operated_count} / {total_operation_count})')
         else:
             _LOGGER.debug(f'There is no operations')
 
