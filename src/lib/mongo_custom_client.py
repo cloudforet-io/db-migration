@@ -65,12 +65,17 @@ class MongoCustomClient(object):
         collection = self._get_collection(db_name, col_name)
 
         if isinstance(collection, pymongo.collection.Collection):
-            total_count = collection.count_documents(q_filter)
-            page_count = math.ceil(total_count / self.page_size)
-
-            for page_num in range(page_count):
+            page_num = 0
+            while True:
                 skip_size = page_num * self.page_size
-                yield collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
+                cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
+
+                items = list(cursor)
+                if len(items) == 0:
+                    break
+
+                yield items
+                page_num += 1
 
     def aggregate(self, db_name: str, col_name: str, pipeline: list):
         collection = self._get_collection(db_name, col_name)
