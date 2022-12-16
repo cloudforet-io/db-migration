@@ -40,9 +40,17 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
     mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
 
 
+def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
+    mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
+                             {"$set": {'scope': 'DOMAIN'}}, upsert=True)
+
+
 def main(file_path, debug):
     mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
 
     # refactor alert_number
     monitoring_alert_number_remove_collection(mongo_client)
     monitoring_alert_refactor_alert_number_by_domain_id(mongo_client)
+
+    # change_scope in escalation_policy
+    monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client)
