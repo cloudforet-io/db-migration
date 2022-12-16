@@ -1,5 +1,6 @@
 # A number of rows to be sent as a batch to the database
 BATCH_SIZE = 1000
+PAGE_SIZE = 100
 
 # This is used because the database name is different depending on the environment.
 DB_NAME_MAP = {
