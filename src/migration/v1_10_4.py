@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 @check_time
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
-    for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {}):
+    for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {'_id': 1}):
         operations = []
         for item in items:
             operations.append(
@@ -27,7 +27,7 @@ def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
 @check_time
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
-    for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {}):
+    for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {'_id': 1}):
         operations = []
         for item in items:
             operations.append(
