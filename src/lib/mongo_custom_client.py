@@ -16,13 +16,15 @@ class MongoCustomClient(object):
         self.debug = debug
         if file_path:
             self.file_conf = load_yaml_from_file(file_path)
-            self.batch_size = self.file_conf.get('BATCH_SIZE')
-            self.db_name_map = self.file_conf.get('DB_NAME_MAP')
+            self.batch_size = self.file_conf.get('BATCH_SIZE', BATCH_SIZE)
+            self.page_size = self.file_conf.get('PAGE_SIZE', PAGE_SIZE)
+            self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
             _LOGGER.debug('[Config] conf from external yaml applied')
 
         else:
             self.file_conf = None
             self.batch_size = BATCH_SIZE
+            self.page_size = PAGE_SIZE
             self.db_name_map = DB_NAME_MAP
             _LOGGER.debug('[Config] conf from default conf')
         self._create_connection_pool()
@@ -55,6 +57,19 @@ class MongoCustomClient(object):
             return collection.find(q_filter, projection)
         else:
             return []
+
+    def find_by_pagination(self, db_name: str, col_name: str, q_filter: dict, projection=None):
+        if projection is None:
+            projection = {}
+        collection = self._get_collection(db_name, col_name)
+
+        if isinstance(collection, pymongo.collection.Collection):
+            total_count = collection.count_documents({})
+            last_page_num = (total_count // self.page_size) + 1
+
+            for page_num in range(1, last_page_num + 1):
+                skip_argument = (page_num - 1) * self.page_size
+                yield collection.find(q_filter, projection).skip(skip_argument).limit(self.page_size)
 
     def aggregate(self, db_name: str, col_name: str, pipeline: list):
         collection = self._get_collection(db_name, col_name)
