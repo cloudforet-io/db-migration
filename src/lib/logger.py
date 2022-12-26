@@ -2,6 +2,8 @@ import logging
 import logging.config
 import copy
 import os
+from prompt_toolkit import prompt
+from datetime import datetime
 
 from conf.default_conf import *
 from lib.util import load_yaml_from_file, deep_merge
@@ -31,10 +33,6 @@ def _set_config(version, file_path, debug):
 
     _set_default_logger(DEFAULT_LOGGER, version, debug, external_log_dir_path)
 
-    if external_log_dir_path:
-        external_file_path = _set_external_file_path(external_log_dir_path, version)
-        _LOGGER['handlers']['file']['filename'] = external_file_path
-
     if 'loggers' in global_log_conf:
         _set_loggers(global_log_conf['loggers'])
 
@@ -49,13 +47,13 @@ def _set_default_logger(default_logger, version, debug, external_log_dir_path):
     _LOGGER['loggers'] = {default_logger: LOGGER_DEFAULT_TMPL}
     _LOGGER['formatters'] = FORMATTER_DEFAULT_TMPL
 
-    _set_default_file_path(version, external_log_dir_path)
+    _set_log_file_path(version, external_log_dir_path)
 
     if debug:
         _LOGGER['loggers'][DEFAULT_LOGGER]['level'] = 'DEBUG'
 
 
-def _set_default_file_path(version, external_log_dir_path):
+def _set_log_file_path(version, external_log_dir_path):
     home = os.path.expanduser("~")
     log_directory = 'db_migration_log'
     file_path = f'{home}/{log_directory}/{version}.log'
@@ -64,14 +62,20 @@ def _set_default_file_path(version, external_log_dir_path):
             raise FileExistsError(f'A previously recorded log file exists. ({file_path})')
         if not os.path.isdir(os.path.join(home, log_directory)):
             os.mkdir(os.path.join(home, log_directory))
+    else:
+        file_path = _set_external_file_path(external_log_dir_path, version)
 
     _LOGGER['handlers']['file']['filename'] = file_path
 
 
 def _set_external_file_path(external_file_path, version):
-    file_path = f'{external_file_path}/{version}.log'
+    today = datetime.today().strftime('%Y%m%d')
+    file_path = f'{external_file_path}/{version}.{today}.log'
+
     if os.path.exists(file_path):
-        raise FileExistsError(f'A previously recorded log file exists. ({file_path})')
+        logs = [log for log in os.listdir(external_file_path) if version in log]
+        target_log = sorted(logs)[-1]
+        file_path = _log_decision_prompt(target_log)
     if not os.path.isdir(external_file_path):
         os.mkdir(external_file_path)
     return file_path
@@ -116,3 +120,25 @@ def _set_formatters(formatters):
             del _default['type']
 
         _LOGGER['formatters'][_formatter] = _default
+
+
+def _log_decision_prompt(file_path):
+    log_path = ''
+
+    while True:
+        answer = prompt(f'Do you want to merge the existing logs({file_path}) (Y/N)? : ')
+
+        if answer in ['Y', 'y']:
+            log_path = file_path
+            break
+        elif answer in ['N', 'n']:
+            *chars, last_char = file_path.split('.')
+            if last_char == 'log':
+                log_path = f'{file_path}.1'
+            else:
+                log_path = f'{".".join(chars)}.{int(last_char) + 1}'
+            break
+        else:
+            continue
+
+    return log_path
