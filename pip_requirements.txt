@@ -2,3 +2,4 @@ pymongo
 click
 PyYAML
 dnspython
+prompt-toolkit
