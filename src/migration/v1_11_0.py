@@ -1,19 +1,22 @@
 import logging
+import hashlib
 from pymongo import UpdateOne
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import query, check_time
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 @query
+@check_time
 def monitoring_alert_number_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('MONITORING', 'alert_number')
 
 
 @query
+@check_time
 def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCustomClient):
     domain_ids = mongo_client.distinct('MONITORING', 'alert', 'domain_id')
 
@@ -40,9 +43,91 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
     mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
 
 
+@query
+@check_time
 def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
     mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
                              {"$set": {'scope': 'DOMAIN'}}, upsert=True)
+
+
+@query
+@check_time
+def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomClient):
+    projection = {
+        'provider': 1,
+        'metadata': 1,
+        'tags': 1,
+        'collection_info': 1
+    }
+
+    for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', {}, projection):
+
+        operations = []
+        for cloud_service in cloud_services:
+            provider = cloud_service.get('provider', 'custom')
+            metadata = cloud_service.get('metadata', {})
+            tags = cloud_service.get('tags', {})
+            collection_info = cloud_service.get('collection_info', {})
+
+            update_fields = {"$set": {}}
+
+            if tags and isinstance(tags, list):
+                new_tags = {}
+                new_tag_keys = {}
+
+                for tag in tags:
+                    tag_key = str(tag['key'])
+                    tag_value = str(tag['value'])
+                    tag_type = str(tag['type'])
+                    tag_provider = str(tag.get('provider', 'custom'))
+
+                    hash_value = string_to_hash(tag_key)
+
+                    if new_tags.get(tag_provider):
+                        new_tags[tag_provider].update({hash_value: {'key': tag_key, 'value': tag_value}})
+                    else:
+                        new_tags[tag_provider] = {hash_value: {'key': tag_key, 'value': tag_value}}
+
+                    if tag_type == 'PROVIDER' or 'MANAGED':
+                        if new_tag_keys.get(tag_provider):
+                            new_tag_keys[tag_provider].append(tag_key)
+                        else:
+                            new_tag_keys[tag_provider] = [tag_key]
+                    else:
+                        if new_tag_keys.get('custom'):
+                            new_tag_keys['custom'].append(tag_key)
+                        else:
+                            new_tag_keys['custom'] = [tag_key]
+
+                update_fields['$set'].update({'tags': new_tags})
+                update_fields['$set'].update({'tag_keys': new_tag_keys})
+
+            elif not tags and isinstance(tags, list):
+                update_fields['$set'].update({'tags': {}})
+
+            if metadata and provider not in metadata:
+                for plugin_id in metadata:
+                    update_fields['$set'].update({'metadata': {provider: metadata[plugin_id]}})
+
+                new_metadata = {provider: metadata}
+                update_fields['$set'].update({'metadata': new_metadata})
+
+            elif not metadata and provider in metadata:
+                update_fields['$set'].update({'metadata': {}})
+
+            if collection_info and isinstance(collection_info, dict):
+                update_fields['$set'].update({'collection_info': []})
+
+            if len(update_fields['$set'].keys()) > 0:
+                operations.append(UpdateOne({'_id': cloud_service['_id']}, update_fields))
+
+        mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
+
+
+def string_to_hash(str_value: str) -> str:
+    """MD5 hash of a String."""
+    dhash = hashlib.md5(str_value.encode("utf-8"))
+    return dhash.hexdigest()
 
 
 def main(file_path, debug):
@@ -54,3 +139,6 @@ def main(file_path, debug):
 
     # change_scope in escalation_policy
     monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client)
+
+    # change schema of cloud_service
+    inventory_cloud_service_refactor_data_structure(mongo_client)
