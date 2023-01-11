@@ -78,20 +78,16 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
                 for tag in tags:
                     tag_key = str(tag['key'])
                     tag_value = str(tag['value'])
-                    tag_type = str(tag['type'])
                     tag_provider = str(tag.get('provider', 'custom'))
 
-                    hash_value = string_to_hash(tag_key)
+                    hashed_key = string_to_hash(tag_key)
 
                     new_tags[tag_provider] = new_tags.get(tag_provider, {})
-                    new_tags[tag_provider].update({hash_value: {'key': tag_key, 'value': tag_value}})
+                    new_tags[tag_provider][hashed_key] = {'key': tag_key, 'value': tag_value}
 
-                    if tag_type != 'CUSTOM':
-                        new_tag_keys[tag_provider] = new_tag_keys.get(tag_provider, [])
-                        new_tag_keys[tag_provider].append(tag_key)
-                    else:
-                        new_tag_keys['custom'] = new_tag_keys.get(tag_provider, [])
-                        new_tag_keys['custom'].append(tag_key)
+                    new_tag_keys[tag_provider] = new_tag_keys.get(tag_provider, [])
+                    new_tag_keys[tag_provider].append(tag_key)
+                    new_tag_keys[tag_provider] = list(set(new_tag_keys[tag_provider]))
 
                 update_fields['$set'].update({'tags': new_tags})
                 update_fields['$set'].update({'tag_keys': new_tag_keys})
@@ -100,14 +96,11 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
                 update_fields['$set'].update({'tags': {}})
 
             if metadata and provider not in metadata:
+                new_metadata = {}
                 for plugin_id in metadata:
-                    update_fields['$set'].update({'metadata': {provider: metadata[plugin_id]}})
+                    new_metadata = {provider: metadata[plugin_id]}
 
-                new_metadata = {provider: metadata}
-                update_fields['$set'].update({'metadata': new_metadata})
-
-            elif not metadata and provider in metadata:
-                update_fields['$set'].update({'metadata': {}})
+                update_fields['$set'].update(new_metadata)
 
             if collection_info and isinstance(collection_info, dict):
                 update_fields['$set'].update({'collection_info': []})
