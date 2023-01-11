@@ -102,7 +102,7 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
                 for plugin_id in metadata:
                     new_metadata = {provider: metadata[plugin_id]}
 
-                update_fields['$set'].update(new_metadata)
+                update_fields['$set'].update({'metadata': new_metadata})
 
             if collection_info and isinstance(collection_info, dict):
                 update_fields['$set'].update({'collection_info': []})
