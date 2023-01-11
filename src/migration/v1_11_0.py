@@ -87,7 +87,9 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
                     new_tag_keys[tag_provider] = new_tag_keys.get(tag_provider, [])
                     new_tag_keys[tag_provider].append(tag_key)
-                    new_tag_keys[tag_provider] = list(set(new_tag_keys[tag_provider]))
+
+                for provider, tag_keys in new_tag_keys.items():
+                    new_tag_keys[provider] = list(set(new_tag_keys[provider]))
 
                 update_fields['$set'].update({'tags': new_tags})
                 update_fields['$set'].update({'tag_keys': new_tag_keys})
