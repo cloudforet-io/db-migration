@@ -112,6 +112,11 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
         mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
 
+@query
+@check_time
+def inventory_cloud_service_tag_remove_collection(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection('INVENTORY', 'cloud_service_tag')
+
 
 def string_to_hash(str_value: str) -> str:
     """MD5 hash of a String."""
@@ -131,3 +136,4 @@ def main(file_path, debug):
 
     # change schema of cloud_service
     inventory_cloud_service_refactor_data_structure(mongo_client)
+    inventory_cloud_service_tag_remove_collection(mongo_client)
