@@ -3,4 +3,3 @@ click
 PyYAML
 dnspython
 prompt-toolkit
-hashlib
