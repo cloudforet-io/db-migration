@@ -114,6 +114,18 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
 @query
 @check_time
+def inventory_server_remove_collection(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection('INVENTORY', 'server')
+
+
+@query
+@check_time
+def inventory_zone_remove_collection(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection('INVENTORY', 'zone')
+
+
+@query
+@check_time
 def inventory_cloud_service_tag_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'cloud_service_tag')
 
@@ -136,4 +148,9 @@ def main(file_path, debug):
 
     # change schema of cloud_service
     inventory_cloud_service_refactor_data_structure(mongo_client)
+
+    # remove unused collections
     inventory_cloud_service_tag_remove_collection(mongo_client)
+    inventory_server_remove_collection(mongo_client)
+    inventory_zone_remove_collection(mongo_client)
+
