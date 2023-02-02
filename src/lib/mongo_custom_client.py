@@ -51,6 +51,13 @@ class MongoCustomClient(object):
         if isinstance(collection, pymongo.collection.Collection):
             collection.delete_many(q_filter, q_options)
 
+    def count(self, db_name: str, col_name: str, q_filter: dict):
+        collection = self._get_collection(db_name, col_name)
+        if isinstance(collection, pymongo.collection.Collection):
+            return collection.find(q_filter).count()
+        else:
+            return 0
+
     def find(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -83,12 +90,13 @@ class MongoCustomClient(object):
         else:
             return []
 
-    def bulk_write(self, db_name: str, col_name: str, operations: list):
+    def bulk_write(self, db_name: str, col_name: str, operations: list, total_count: int = None):
         if len(operations) > 0:
             collection = self._get_collection(db_name, col_name)
             if isinstance(collection, pymongo.collection.Collection):
                 total_operation_count = len(operations)
                 batch_count = math.ceil(total_operation_count / self.batch_size)
+                total_count = total_count or total_operation_count
 
                 operated_count = 0
                 for batch_num in range(batch_count):
@@ -98,7 +106,7 @@ class MongoCustomClient(object):
                     collection.bulk_write(seperated_operations)
                     operated_count += len(seperated_operations)
                     _LOGGER.debug(
-                        f'[DB-Migration] Operated Count : ({operated_count} / {total_operation_count})')
+                        f'[DB-Migration] Operated Count : ({operated_count} / {total_count})')
         else:
             _LOGGER.debug(f'There is no operations')
 
