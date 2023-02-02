@@ -60,6 +60,8 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
         'collection_info': 1
     }
 
+    total_count = mongo_client.count('INVENTORY', 'cloud_service', {})
+
     for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', {}, projection):
 
         operations = []
@@ -77,7 +79,7 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
                 for tag in tags:
                     tag_key = str(tag['key'])
-                    tag_value = str(tag['value'])
+                    tag_value = str(tag.get('value', ''))
                     tag_provider = str(tag.get('provider', 'custom'))
 
                     hashed_key = string_to_hash(tag_key)
@@ -110,7 +112,7 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
             if len(update_fields['$set'].keys()) > 0:
                 operations.append(UpdateOne({'_id': cloud_service['_id']}, update_fields))
 
-        mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
+        mongo_client.bulk_write('INVENTORY', 'cloud_service', operations, total_count=total_count)
 
 @query
 @check_time
