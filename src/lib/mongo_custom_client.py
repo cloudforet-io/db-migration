@@ -54,7 +54,7 @@ class MongoCustomClient(object):
     def count(self, db_name: str, col_name: str, q_filter: dict):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
-            return collection.find(q_filter).count()
+            return collection.count_documents(q_filter)
         else:
             return 0
 
