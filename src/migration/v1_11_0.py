@@ -59,11 +59,10 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
         'tags': 1,
         'collection_info': 1
     }
-
-    total_count = mongo_client.count('INVENTORY', 'cloud_service', {})
-
     target_filter = {'tags': {'$type': 'array'}}
 
+    total_count = mongo_client.count('INVENTORY', 'cloud_service', target_filter)
+    count = 0
     for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', target_filter, projection):
 
         operations = []
@@ -114,7 +113,17 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
             if len(update_fields['$set'].keys()) > 0:
                 operations.append(UpdateOne({'_id': cloud_service['_id']}, update_fields))
 
-        mongo_client.bulk_write('INVENTORY', 'cloud_service', operations, total_count=total_count)
+        count += len(operations)
+        _LOGGER.debug(
+            f'[DB-Migration] Operated Count : ({count} / {total_count})')
+        mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
+
+
+@query
+@check_time
+def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
+    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {},
+                             {"$set": {'rule_type': 'MANAGED'}}, upsert=True)
 
 
 @query
@@ -153,6 +162,9 @@ def main(file_path, debug):
 
     # change schema of cloud_service
     inventory_cloud_service_refactor_data_structure(mongo_client)
+
+    # add rule_type in data_source_rule of cost-analysis
+    cost_analysis_data_source_rule_set_rule_type(mongo_client)
 
     # remove unused collections
     inventory_cloud_service_tag_remove_collection(mongo_client)
