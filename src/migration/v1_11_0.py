@@ -62,7 +62,9 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
     total_count = mongo_client.count('INVENTORY', 'cloud_service', {})
 
-    for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', {}, projection):
+    target_filter = {'tags': {'$type': 'array'}}
+
+    for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', target_filter, projection):
 
         operations = []
         for cloud_service in cloud_services:
@@ -114,6 +116,7 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
         mongo_client.bulk_write('INVENTORY', 'cloud_service', operations, total_count=total_count)
 
+
 @query
 @check_time
 def inventory_server_remove_collection(mongo_client: MongoCustomClient):
@@ -155,4 +158,3 @@ def main(file_path, debug):
     inventory_cloud_service_tag_remove_collection(mongo_client)
     inventory_server_remove_collection(mongo_client)
     inventory_zone_remove_collection(mongo_client)
-
