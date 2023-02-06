@@ -54,7 +54,7 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 @check_time
 def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
     mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
-                             {"$set": {'scope': 'DOMAIN'}}, upsert=True)
+                             {"$set": {'scope': 'DOMAIN'}})
 
 
 @query
@@ -129,8 +129,8 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 @query
 @check_time
 def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
-    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {},
-                             {"$set": {'rule_type': 'MANAGED'}}, upsert=True)
+    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
+                             {"$set": {'rule_type': 'MANAGED'}})
 
 
 @query
