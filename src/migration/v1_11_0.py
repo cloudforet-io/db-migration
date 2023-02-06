@@ -22,8 +22,12 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 
     records = []
     for domain_id in domain_ids:
+        target_filter = {
+            "domain_id": domain_id,
+            "alert_number_str": {"$exists": False}
+        }
         alerts = mongo_client.find('MONITORING', 'alert',
-                                   {"domain_id": domain_id}, {"_id": 1, "created_at": 1}).sort('created_at', 1)
+                                   target_filter, {"_id": 1, "created_at": 1}).sort('created_at', 1)
 
         if alerts:
             alert_number = 0
@@ -38,9 +42,12 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
             records.append({"domain_id": domain_id, "next": alert_number})
             mongo_client.bulk_write('MONITORING', 'alert', operations)
 
-        _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {number})")
+            _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {alert_number})")
 
-    mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
+    valid_records = [record for record in records if record['next'] != 0]
+    if valid_records:
+        mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
+        _LOGGER.debug(f"alert_number collection created (record count: {len(valid_records)})")
 
 
 @query
