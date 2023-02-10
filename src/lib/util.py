@@ -37,22 +37,14 @@ def load_yaml_from_file(yaml_file: str) -> dict:
         raise Exception(f'YAML Load Error: {yaml_file}')
 
 
-def check_time(func):
-    @functools.wraps(func)
-    def newFunc(*args, **kwargs):
-        start = time.time()
-        func(*args, **kwargs)
-        end = time.time()
-        _LOGGER.debug(f'[Total time] {end - start:.2f} sec')
-
-    return newFunc
-
-
 def query(func):
     @functools.wraps(func)
     def newFunc(*args, **kwargs):
         _LOGGER.info(f'[EXECUTE] {func.__name__} >>>>>>>>')
+        start = time.time()
         func(*args, **kwargs)
+        end = time.time()
+        _LOGGER.debug(f'[Total time] {seconds_to_human_readable(int(end - start))}')
         _LOGGER.info(f'[DONE] {func.__name__} >>>>>>>>\n\n')
 
     return newFunc
@@ -67,3 +59,11 @@ def deep_merge(from_dict: dict, into_dict: dict) -> dict:
             into_dict[key] = value
 
     return into_dict
+
+
+def seconds_to_human_readable(seconds: int) -> str:
+    hours = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return "%02d:%02d:%02d" % (hours, minutes, seconds)

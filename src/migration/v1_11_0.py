@@ -4,19 +4,17 @@ from pymongo import UpdateOne
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
-from lib.util import query, check_time
+from lib.util import query
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 @query
-@check_time
 def monitoring_alert_number_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('MONITORING', 'alert_number')
 
 
 @query
-@check_time
 def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCustomClient):
     domain_ids = mongo_client.distinct('MONITORING', 'alert', 'domain_id')
 
@@ -51,14 +49,12 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 
 
 @query
-@check_time
 def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
     mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
                              {"$set": {'scope': 'DOMAIN'}})
 
 
 @query
-@check_time
 def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomClient):
     projection = {
         'provider': 1,
@@ -122,26 +118,22 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
 
 @query
-@check_time
 def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
     mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
                              {"$set": {'rule_type': 'MANAGED'}})
 
 
 @query
-@check_time
 def inventory_server_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'server')
 
 
 @query
-@check_time
 def inventory_zone_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'zone')
 
 
 @query
-@check_time
 def inventory_cloud_service_tag_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'cloud_service_tag')
 

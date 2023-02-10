@@ -2,13 +2,12 @@ import logging
 from conf import DEFAULT_LOGGER
 from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
-from lib.util import query, check_time
+from lib.util import query
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 @query
-@check_time
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {'_id': 1}):
@@ -26,7 +25,6 @@ def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
 
 
 @query
-@check_time
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {'_id': 1}):
