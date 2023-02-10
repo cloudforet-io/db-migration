@@ -22,8 +22,12 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
 
     records = []
     for domain_id in domain_ids:
+        target_filter = {
+            "domain_id": domain_id,
+            "alert_number_str": {"$exists": False}
+        }
         alerts = mongo_client.find('MONITORING', 'alert',
-                                   {"domain_id": domain_id}, {"_id": 1, "created_at": 1}).sort('created_at', 1)
+                                   target_filter, {"_id": 1, "created_at": 1}).sort('created_at', 1)
 
         if alerts:
             alert_number = 0
@@ -38,16 +42,19 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
             records.append({"domain_id": domain_id, "next": alert_number})
             mongo_client.bulk_write('MONITORING', 'alert', operations)
 
-        _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {number})")
+            _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {alert_number})")
 
-    mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
+    valid_records = [record for record in records if record['next'] != 0]
+    if valid_records:
+        mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
+        _LOGGER.debug(f"alert_number collection created (record count: {len(valid_records)})")
 
 
 @query
 @check_time
 def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
     mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
-                             {"$set": {'scope': 'DOMAIN'}}, upsert=True)
+                             {"$set": {'scope': 'DOMAIN'}})
 
 
 @query
@@ -61,10 +68,8 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
     }
     target_filter = {'tags': {'$type': 'array'}}
 
-    total_count = mongo_client.count('INVENTORY', 'cloud_service', target_filter)
-    count = 0
-    for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', target_filter, projection):
-
+    for cloud_services in mongo_client.find_by_pagination('INVENTORY', 'cloud_service', target_filter, projection,
+                                                          show_progress=True):
         operations = []
         for cloud_service in cloud_services:
             provider = cloud_service.get('provider', 'custom')
@@ -113,17 +118,14 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
             if len(update_fields['$set'].keys()) > 0:
                 operations.append(UpdateOne({'_id': cloud_service['_id']}, update_fields))
 
-        count += len(operations)
-        _LOGGER.debug(
-            f'[DB-Migration] Operated Count : ({count} / {total_count})')
         mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
 
 
 @query
 @check_time
 def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
-    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {},
-                             {"$set": {'rule_type': 'MANAGED'}}, upsert=True)
+    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
+                             {"$set": {'rule_type': 'MANAGED'}})
 
 
 @query
