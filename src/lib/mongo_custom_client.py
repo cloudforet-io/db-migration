@@ -4,7 +4,7 @@ import math
 import pymongo.collection
 
 from conf import *
-from lib.util import load_yaml_from_file, check_time
+from lib.util import load_yaml_from_file
 from pymongo import MongoClient
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
@@ -45,7 +45,6 @@ class MongoCustomClient(object):
         if isinstance(collection, pymongo.collection.Collection):
             collection.update_one(q_filter, q_update, upsert)
 
-    @check_time
     def delete_many(self, db_name: str, col_name: str, q_filter: dict, q_options: dict = None):
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
