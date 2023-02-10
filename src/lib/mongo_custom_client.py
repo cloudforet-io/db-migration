@@ -65,20 +65,37 @@ class MongoCustomClient(object):
         else:
             return []
 
-    def find_by_pagination(self, db_name: str, col_name: str, q_filter: dict, projection=None):
+    def find_by_pagination(self, db_name: str, col_name: str, q_filter: dict, projection=None, show_progress=False):
+        total_count = 0
+
         if projection is None:
             projection = {}
         collection = self._get_collection(db_name, col_name)
+
+        if show_progress:
+            total_count = self.count(db_name, col_name, q_filter)
 
         if isinstance(collection, pymongo.collection.Collection):
             page_num = 0
             while True:
                 skip_size = page_num * self.page_size
+                current_count = (page_num + 1) * self.page_size
+                current_percent = round(current_count / total_count * 100, 2)
                 cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
 
                 items = list(cursor)
                 if len(items) == 0:
+                    if total_count != skip_size:
+                        count_diff = total_count - skip_size
+                        count_diff_str = self._create_count_diff_str(count_diff)
+                        _LOGGER.error(
+                            f'There is a change in the number of data. '
+                            f'(expected count - actual count = {count_diff_str})')
                     break
+
+                if show_progress:
+                    _LOGGER.info(
+                        f'{db_name}.{col_name} Operated Count : {current_count}/{total_count} ({current_percent}%)')
 
                 yield items
                 page_num += 1
@@ -93,19 +110,7 @@ class MongoCustomClient(object):
     def bulk_write(self, db_name: str, col_name: str, operations: list):
         if len(operations) > 0:
             collection = self._get_collection(db_name, col_name)
-            if isinstance(collection, pymongo.collection.Collection):
-                total_operation_count = len(operations)
-                batch_count = math.ceil(total_operation_count / self.batch_size)
-
-                operated_count = 0
-                for batch_num in range(batch_count):
-                    start = batch_num * self.batch_size
-                    end = start + self.batch_size
-                    seperated_operations = operations[start:end]
-                    collection.bulk_write(seperated_operations)
-                    operated_count += len(seperated_operations)
-        else:
-            _LOGGER.debug(f'There is no operations')
+            collection.bulk_write(operations)
 
     def get_indexes(self, db_name: str, col_name: str, comment=None):
         results = []
@@ -178,3 +183,12 @@ class MongoCustomClient(object):
         for col_key, col_value in items:
             key[col_key] = col_value
         return key
+
+    @staticmethod
+    def _create_count_diff_str(count_diff):
+        if count_diff == 0:
+            return f'{count_diff}'
+        elif count_diff > 0:
+            return f'+{count_diff}'
+        else:
+            return f'-{abs(count_diff)}'
