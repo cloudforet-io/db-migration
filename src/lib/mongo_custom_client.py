@@ -85,7 +85,11 @@ class MongoCustomClient(object):
             while True:
                 skip_size = page_num * self.page_size
                 current_count = (page_num + 1) * self.page_size
-                current_percent = round(current_count / total_count * 100, 2)
+                try:
+                    current_percent = round(current_count / total_count * 100, 2)
+                except ZeroDivisionError:
+                    _LOGGER.info('No data available.')
+                    return []
                 cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
 
                 items = list(cursor)
