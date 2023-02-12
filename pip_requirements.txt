@@ -3,3 +3,4 @@ click
 PyYAML
 dnspython
 prompt-toolkit
+rich

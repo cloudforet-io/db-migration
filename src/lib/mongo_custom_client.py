@@ -1,10 +1,12 @@
 import logging
-import math
+import yaml
+from rich.console import Console
+from rich.syntax import Syntax
 
 import pymongo.collection
 
 from conf import *
-from lib.util import load_yaml_from_file
+from lib.util import load_yaml_from_file, print_stage, print_finish_stage
 from pymongo import MongoClient
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
@@ -20,7 +22,11 @@ class MongoCustomClient(object):
             self.batch_size = self.file_conf.get('BATCH_SIZE', BATCH_SIZE)
             self.page_size = self.file_conf.get('PAGE_SIZE', PAGE_SIZE)
             self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
-            _LOGGER.debug('[Config] conf from external yaml applied')
+
+            print_stage('SET', 'CONFIG')
+            _LOGGER.debug(f'[Config] config from external yaml applied')
+            _LOGGER.debug(f'[Config] config file path = {file_path}')
+            self._view_yaml()
 
         else:
             self.file_conf = None
@@ -154,6 +160,7 @@ class MongoCustomClient(object):
 
         self.conn = MongoClient(connection_uri, readPreference='primary')
         _LOGGER.debug('[Config] DB connection successful')
+        print_finish_stage()
 
     def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
         try:
@@ -191,3 +198,9 @@ class MongoCustomClient(object):
             return f'+{count_diff}'
         else:
             return f'-{abs(count_diff)}'
+
+    def _view_yaml(self):
+        yaml_str = yaml.dump(self.file_conf, allow_unicode=True, default_flow_style=False)
+        syntax = Syntax(yaml_str, "yaml", theme="monokai", line_numbers=True)
+        console = Console()
+        console.print(syntax)

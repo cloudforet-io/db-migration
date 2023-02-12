@@ -4,11 +4,14 @@ import yaml
 import re
 import functools
 import time
+import click
+import shutil
 
 from conf import DEFAULT_LOGGER
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
+TERMINAL_WIDTH = shutil.get_terminal_size(fallback=(120, 50)).columns
 YAML_LOADER = yaml.Loader
 YAML_LOADER.add_implicit_resolver(
     u'tag:yaml.org,2002:float',
@@ -37,15 +40,27 @@ def load_yaml_from_file(yaml_file: str) -> dict:
         raise Exception(f'YAML Load Error: {yaml_file}')
 
 
+def print_stage(action, name):
+    click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+
+
+def print_finish_stage(action=None, name=None):
+    if action and name:
+        click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+    else:
+        click.echo(f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+    click.echo('')
+
+
 def query(func):
     @functools.wraps(func)
     def newFunc(*args, **kwargs):
-        _LOGGER.info(f'[EXECUTE] {func.__name__} >>>>>>>>')
+        print_stage('EXECUTE', func.__name__)
         start = time.time()
         func(*args, **kwargs)
         end = time.time()
         _LOGGER.debug(f'[Total time] {seconds_to_human_readable(int(end - start))}')
-        _LOGGER.info(f'[DONE] {func.__name__} >>>>>>>>\n\n')
+        print_finish_stage('DONE', func.__name__)
 
     return newFunc
 
