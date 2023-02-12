@@ -82,9 +82,9 @@ class MongoCustomClient(object):
 
         if isinstance(collection, pymongo.collection.Collection):
             page_num = 0
+            current_count = 0
             while True:
                 skip_size = page_num * self.page_size
-                current_count = (page_num + 1) * self.page_size
                 try:
                     current_percent = round(current_count / total_count * 100, 2)
                 except ZeroDivisionError:
@@ -93,9 +93,10 @@ class MongoCustomClient(object):
                 cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
 
                 items = list(cursor)
+                current_count += len(items)
                 if len(items) == 0:
-                    if total_count != skip_size:
-                        count_diff = total_count - skip_size
+                    if total_count != current_count:
+                        count_diff = total_count - current_count
                         count_diff_str = self._create_count_diff_str(count_diff)
                         _LOGGER.error(
                             f'There is a change in the number of data. '
