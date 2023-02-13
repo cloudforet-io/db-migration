@@ -50,6 +50,7 @@ def print_finish_stage(action=None, name=None):
     else:
         click.echo(f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
     click.echo('')
+    click.echo('')
 
 
 def query(func):
@@ -59,8 +60,8 @@ def query(func):
         start = time.time()
         func(*args, **kwargs)
         end = time.time()
-        _LOGGER.debug(f'[Total time] {seconds_to_human_readable(int(end - start))}')
-        print_finish_stage('DONE', func.__name__)
+        _LOGGER.debug(f'Total time : {seconds_to_human_readable(int(end - start))}')
+        print_finish_stage()
 
     return newFunc
 
