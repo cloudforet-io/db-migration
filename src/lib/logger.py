@@ -3,6 +3,7 @@ import logging.config
 import copy
 import os
 import shutil
+import click
 from prompt_toolkit import prompt
 from datetime import datetime
 
@@ -135,6 +136,7 @@ def _log_decision_prompt(external_file_path, file_path):
             old_path = os.path.join(external_file_path, file_path)
             new_path = os.path.join(external_file_path, saved_file_path)
             shutil.copyfile(old_path, new_path)
+            click.echo(f'The old log file has been saved. (saved file={saved_file_path})')
 
             log_path = file_path
             break
