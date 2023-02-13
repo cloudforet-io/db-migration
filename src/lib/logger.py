@@ -2,6 +2,7 @@ import logging
 import logging.config
 import copy
 import os
+import shutil
 from prompt_toolkit import prompt
 from datetime import datetime
 
@@ -69,13 +70,12 @@ def _set_log_file_path(version, external_log_dir_path):
 
 
 def _set_external_file_path(external_file_path, version):
-    today = datetime.today().strftime('%Y%m%d')
-    file_path = f'{external_file_path}/{version}.{today}.log'
+    file_path = f'{external_file_path}/{version}.log'
 
     if os.path.exists(file_path):
         logs = [log for log in os.listdir(external_file_path) if version in log]
         target_log = sorted(logs)[-1]
-        file_path = _log_decision_prompt(target_log)
+        file_path = _log_decision_prompt(external_file_path, target_log)
     if not os.path.isdir(external_file_path):
         os.mkdir(external_file_path)
     return file_path
@@ -122,21 +122,24 @@ def _set_formatters(formatters):
         _LOGGER['formatters'][_formatter] = _default
 
 
-def _log_decision_prompt(file_path):
+def _log_decision_prompt(external_file_path, file_path):
     log_path = ''
 
     while True:
-        answer = prompt(f'Do you want to merge the existing logs({file_path}) (Y/N)? : ')
+        answer = prompt(f'Would you like to save the old log file?({file_path}) (Y/N)? : ')
 
         if answer in ['Y', 'y']:
+            today = datetime.today().strftime('%Y%m%d%H%m%S')
+            version, subfix = file_path.split('.log')
+            saved_file_path = f'{version}.{today}.log'
+            old_path = os.path.join(external_file_path, file_path)
+            new_path = os.path.join(external_file_path, saved_file_path)
+            shutil.copyfile(old_path, new_path)
+
             log_path = file_path
             break
         elif answer in ['N', 'n']:
-            *chars, last_char = file_path.split('.')
-            if last_char == 'log':
-                log_path = f'{file_path}.1'
-            else:
-                log_path = f'{".".join(chars)}.{int(last_char) + 1}'
+            log_path = file_path
             break
         else:
             continue

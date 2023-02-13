@@ -24,8 +24,8 @@ class MongoCustomClient(object):
             self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
 
             print_stage('SET', 'CONFIG')
-            _LOGGER.debug(f'config from external yaml applied')
-            _LOGGER.debug(f'config file path = {file_path}')
+            _LOGGER.debug(
+                f'config from external yaml applied (file_path={file_path})')
             self._view_yaml()
 
         else:
@@ -165,7 +165,7 @@ class MongoCustomClient(object):
             raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
 
         self.conn = MongoClient(connection_uri, readPreference='primary')
-        _LOGGER.debug('DB connection successful')
+        _LOGGER.debug('Mongo DB connection successful')
         print_finish_stage()
 
     def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
