@@ -50,6 +50,7 @@ def print_finish_stage(action=None, name=None):
     else:
         click.echo(f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
     click.echo('')
+    click.echo('')
 
 
 def query(func):

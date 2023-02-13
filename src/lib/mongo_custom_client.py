@@ -85,11 +85,6 @@ class MongoCustomClient(object):
             current_count = 0
             while True:
                 skip_size = page_num * self.page_size
-                try:
-                    current_percent = round(current_count / total_count * 100, 2)
-                except ZeroDivisionError:
-                    _LOGGER.info('No data available.')
-                    return []
                 cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
 
                 items = list(cursor)
@@ -102,6 +97,12 @@ class MongoCustomClient(object):
                             f'There is a change in the number of data. '
                             f'(expected count - actual count = {count_diff_str})')
                     break
+
+                try:
+                    current_percent = round(current_count / total_count * 100, 2)
+                except ZeroDivisionError:
+                    _LOGGER.info('No data available.')
+                    return []
 
                 if show_progress:
                     _LOGGER.info(
