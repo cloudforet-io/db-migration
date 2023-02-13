@@ -127,7 +127,7 @@ def _log_decision_prompt(external_file_path, file_path):
     log_path = ''
 
     while True:
-        answer = prompt(f'Would you like to save the old log file?({file_path}) (Y/N)? : ')
+        answer = prompt(f'Would you like to save the previous log file?({file_path}) (Y/N)? : ')
 
         if answer in ['Y', 'y']:
             today = datetime.today().strftime('%Y%m%d%H%m%S')

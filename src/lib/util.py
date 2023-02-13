@@ -41,14 +41,17 @@ def load_yaml_from_file(yaml_file: str) -> dict:
 
 
 def print_stage(action, name):
-    click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+    title = f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+
+    click.echo(click.style(title, fg='bright_magenta', bold=True))
 
 
 def print_finish_stage(action=None, name=None):
     if action and name:
-        click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+        title = f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
     else:
-        click.echo(f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+        title = f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+    click.echo(click.style(title, fg='bright_magenta', bold=True))
     click.echo('')
     click.echo('')
 
