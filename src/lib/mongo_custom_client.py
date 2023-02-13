@@ -24,8 +24,8 @@ class MongoCustomClient(object):
             self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
 
             print_stage('SET', 'CONFIG')
-            _LOGGER.debug(f'[Config] config from external yaml applied')
-            _LOGGER.debug(f'[Config] config file path = {file_path}')
+            _LOGGER.debug(f'config from external yaml applied')
+            _LOGGER.debug(f'config file path = {file_path}')
             self._view_yaml()
 
         else:
@@ -33,7 +33,7 @@ class MongoCustomClient(object):
             self.batch_size = BATCH_SIZE
             self.page_size = PAGE_SIZE
             self.db_name_map = DB_NAME_MAP
-            _LOGGER.debug('[Config] conf from default conf')
+            _LOGGER.debug('conf from default conf')
         self._create_connection_pool()
 
     def insert_many(self, db_name: str, col_name: str, records, is_new):
@@ -165,7 +165,7 @@ class MongoCustomClient(object):
             raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
 
         self.conn = MongoClient(connection_uri, readPreference='primary')
-        _LOGGER.debug('[Config] DB connection successful')
+        _LOGGER.debug('DB connection successful')
         print_finish_stage()
 
     def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
@@ -186,7 +186,7 @@ class MongoCustomClient(object):
             return self.conn[db_name][col_name]
 
         except Exception as e:
-            _LOGGER.debug(f'[SKIP] {e}')
+            _LOGGER.debug(f'SKIP / {e}')
             return None
 
     @staticmethod
