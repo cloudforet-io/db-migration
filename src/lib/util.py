@@ -1,5 +1,4 @@
 import logging
-
 import yaml
 import re
 import functools
@@ -7,6 +6,7 @@ import time
 import click
 import shutil
 
+from datetime import datetime
 from conf import DEFAULT_LOGGER
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
@@ -41,27 +41,32 @@ def load_yaml_from_file(yaml_file: str) -> dict:
 
 
 def print_stage(action, name):
-    click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+    title = f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+    click.echo(click.style(title, fg='bright_yellow', bold=True))
 
 
-def print_finish_stage(action=None, name=None):
+def print_finish_stage(action=None, name=None, total_time=None):
     if action and name:
-        click.echo(f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+        if total_time:
+            title = f' [{action}] {name} ({total_time})'[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+        else:
+            title = f' [{action}] {name}'[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
     else:
-        click.echo(f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '='))
+        title = f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+    click.echo(click.style(title, fg='bright_yellow', bold=True))
     click.echo('')
     click.echo('')
 
 
-def query(func):
+def print_log(func):
     @functools.wraps(func)
     def newFunc(*args, **kwargs):
         print_stage('EXECUTE', func.__name__)
-        start = time.time()
+        start = datetime.now()
         func(*args, **kwargs)
-        end = time.time()
-        _LOGGER.debug(f'Total time : {seconds_to_human_readable(int(end - start))}')
-        print_finish_stage()
+        end = datetime.now()
+        _LOGGER.info(f'Total time : {end - start}')
+        print_finish_stage('DONE', func.__name__, end - start)
 
     return newFunc
 
@@ -75,11 +80,3 @@ def deep_merge(from_dict: dict, into_dict: dict) -> dict:
             into_dict[key] = value
 
     return into_dict
-
-
-def seconds_to_human_readable(seconds: int) -> str:
-    hours = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60
-    return "%02d:%02d:%02d" % (hours, minutes, seconds)

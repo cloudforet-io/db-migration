@@ -4,17 +4,17 @@ from pymongo import UpdateOne
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
-@query
+@print_log
 def monitoring_alert_number_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('MONITORING', 'alert_number')
 
 
-@query
+@print_log
 def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCustomClient):
     domain_ids = mongo_client.distinct('MONITORING', 'alert', 'domain_id')
 
@@ -40,21 +40,21 @@ def monitoring_alert_refactor_alert_number_by_domain_id(mongo_client: MongoCusto
             records.append({"domain_id": domain_id, "next": alert_number})
             mongo_client.bulk_write('MONITORING', 'alert', operations)
 
-            _LOGGER.debug(f"alert_number changed (domain_id: {domain_id} / number: {alert_number})")
+            _LOGGER.info(f"alert_number changed (domain_id: {domain_id} / number: {alert_number})")
 
     valid_records = [record for record in records if record['next'] != 0]
     if valid_records:
         mongo_client.insert_many('MONITORING', 'alert_number', records, is_new=True)
-        _LOGGER.debug(f"alert_number collection created (record count: {len(valid_records)})")
+        _LOGGER.info(f"alert_number collection created (record count: {len(valid_records)})")
 
 
-@query
+@print_log
 def monitoring_escalation_policy_change_scope_from_global_to_domain(mongo_client: MongoCustomClient):
     mongo_client.update_many('MONITORING', 'escalation_policy', {"scope": {"$eq": "GLOBAL"}},
                              {"$set": {'scope': 'DOMAIN'}})
 
 
-@query
+@print_log
 def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomClient):
     projection = {
         'provider': 1,
@@ -117,23 +117,23 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
         mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
 
 
-@query
+@print_log
 def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
     mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
                              {"$set": {'rule_type': 'MANAGED'}})
 
 
-@query
+@print_log
 def inventory_server_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'server')
 
 
-@query
+@print_log
 def inventory_zone_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'zone')
 
 
-@query
+@print_log
 def inventory_cloud_service_tag_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('INVENTORY', 'cloud_service_tag')
 
@@ -144,8 +144,8 @@ def string_to_hash(str_value: str) -> str:
     return dhash.hexdigest()
 
 
-def main(file_path, debug):
-    mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
+def main(file_path):
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, 'v1.11.0')
 
     # refactor alert_number
     monitoring_alert_number_remove_collection(mongo_client)

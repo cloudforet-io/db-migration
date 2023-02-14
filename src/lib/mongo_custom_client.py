@@ -1,5 +1,6 @@
 import logging
 import yaml
+from prompt_toolkit import prompt
 from rich.console import Console
 from rich.syntax import Syntax
 
@@ -14,9 +15,8 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 class MongoCustomClient(object):
 
-    def __init__(self, file_path: str = None, debug: bool = False):
+    def __init__(self, file_path: str = None, version: str = None):
         self.conn = None
-        self.debug = debug
         if file_path:
             self.file_conf = load_yaml_from_file(file_path)
             self.batch_size = self.file_conf.get('BATCH_SIZE', BATCH_SIZE)
@@ -24,7 +24,7 @@ class MongoCustomClient(object):
             self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
 
             print_stage('SET', 'CONFIG')
-            _LOGGER.debug(
+            _LOGGER.info(
                 f'config from external yaml applied (file_path={file_path})')
             self._view_yaml()
 
@@ -33,8 +33,10 @@ class MongoCustomClient(object):
             self.batch_size = BATCH_SIZE
             self.page_size = PAGE_SIZE
             self.db_name_map = DB_NAME_MAP
-            _LOGGER.debug('conf from default conf')
-        self._create_connection_pool()
+            _LOGGER.info('conf from default conf')
+
+        if self._ask_valid_config(version):
+            self._create_connection_pool()
 
     def insert_many(self, db_name: str, col_name: str, records, is_new):
         collection = self._get_collection(db_name, col_name, is_new)
@@ -165,7 +167,7 @@ class MongoCustomClient(object):
             raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
 
         self.conn = MongoClient(connection_uri, readPreference='primary')
-        _LOGGER.debug('Mongo DB connection successful')
+        _LOGGER.info('Mongo DB connection successful')
         print_finish_stage()
 
     def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
@@ -186,7 +188,7 @@ class MongoCustomClient(object):
             return self.conn[db_name][col_name]
 
         except Exception as e:
-            _LOGGER.debug(f'SKIP / {e}')
+            _LOGGER.info(f'SKIP / {e}')
             return None
 
     @staticmethod
@@ -210,3 +212,21 @@ class MongoCustomClient(object):
         syntax = Syntax(yaml_str, "yaml", theme="monokai", line_numbers=True)
         console = Console()
         console.print(syntax)
+
+    @staticmethod
+    def _ask_valid_config(version):
+        while True:
+            answer = prompt(
+                f'The corresponding migration version is {version}. Do you want to run with that config? (Y/N)?')
+
+            if answer in ['Y', 'y']:
+                break
+            elif answer in ['N', 'n']:
+                raise ValueError('Migration is canceled. Please check the config and try again.')
+            else:
+                continue
+
+        if answer in ['Y', 'y']:
+            return True
+        else:
+            return False

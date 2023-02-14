@@ -3,13 +3,13 @@ from pymongo import UpdateOne
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 # identity service
-@query
+@print_log
 def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'project_group', {}, {'tags': 1})
 
@@ -23,7 +23,7 @@ def identity_project_group_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'project_group', operations)
 
 
-@query
+@print_log
 def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'role_binding', {}, {'tags': 1})
 
@@ -37,7 +37,7 @@ def identity_role_binding_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'role_binding', operations)
 
 
-@query
+@print_log
 def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'project', {}, {'tags': 1})
 
@@ -51,7 +51,7 @@ def identity_project_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'project', operations)
 
 
-@query
+@print_log
 def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'user', {}, {'tags': 1})
 
@@ -65,7 +65,7 @@ def identity_user_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'user', operations)
 
 
-@query
+@print_log
 def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'service_account', {}, {'tags': 1})
 
@@ -79,7 +79,7 @@ def identity_service_account_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'service_account', operations)
 
 
-@query
+@print_log
 def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'domain', {}, {'tags': 1})
 
@@ -93,7 +93,7 @@ def identity_domain_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'domain', operations)
 
 
-@query
+@print_log
 def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'role', {}, {'tags': 1})
 
@@ -107,7 +107,7 @@ def identity_role_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'role', operations)
 
 
-@query
+@print_log
 def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'provider', {}, {'tags': 1})
 
@@ -121,7 +121,7 @@ def identity_provider_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('IDENTITY', 'provider', operations)
 
 
-@query
+@print_log
 def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('IDENTITY', 'policy', {}, {'tags': 1})
 
@@ -136,7 +136,7 @@ def identity_policy_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # monitoring service
-@query
+@print_log
 def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('MONITORING', 'data_source', {}, {'tags': 1})
 
@@ -151,7 +151,7 @@ def monitoring_data_source_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # statistic service
-@query
+@print_log
 def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('STATISTICS', 'schedule', {}, {'tags': 1})
 
@@ -166,7 +166,7 @@ def statistics_schedule_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # secret service
-@query
+@print_log
 def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('SECRET', 'secret', {}, {'tags': 1})
 
@@ -180,7 +180,7 @@ def secret_secret_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('SECRET', 'secret', operations)
 
 
-@query
+@print_log
 def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('SECRET', 'secret_group', {}, {'tags': 1})
 
@@ -195,7 +195,7 @@ def secret_secret_group_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # repository service
-@query
+@print_log
 def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('REPOSITORY', 'schema', {}, {'tags': 1})
 
@@ -209,7 +209,7 @@ def repository_schema_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('REPOSITORY', 'schema', operations)
 
 
-@query
+@print_log
 def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('REPOSITORY', 'plugin', {}, {'tags': 1})
 
@@ -223,7 +223,7 @@ def repository_plugin_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('REPOSITORY', 'plugin', operations)
 
 
-@query
+@print_log
 def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('REPOSITORY', 'policy', {}, {'tags': 1})
 
@@ -237,7 +237,7 @@ def repository_policy_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('REPOSITORY', 'policy', operations)
 
 
-@query
+@print_log
 def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('PLUGIN', 'supervisor', {}, {'tags': 1})
 
@@ -252,7 +252,7 @@ def plugin_supervisor_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # config service
-@query
+@print_log
 def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('CONFIG', 'user_config', {}, {'tags': 1})
 
@@ -266,7 +266,7 @@ def config_user_config_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('CONFIG', 'user_config', operations)
 
 
-@query
+@print_log
 def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('CONFIG', 'domain_config', {}, {'tags': 1})
 
@@ -281,7 +281,7 @@ def config_domain_config_tags_refactoring(mongo_client: MongoCustomClient):
 
 
 # inventory service
-@query
+@print_log
 def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'resource_group', {}, {'tags': 1})
 
@@ -295,7 +295,7 @@ def inventory_resource_group_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('INVENTORY', 'resource_group', operations)
 
 
-@query
+@print_log
 def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'region', {}, {'tags': 1})
 
@@ -309,7 +309,7 @@ def inventory_region_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('INVENTORY', 'region', operations)
 
 
-@query
+@print_log
 def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'collector', {}, {'tags': 1})
 
@@ -323,7 +323,7 @@ def inventory_collector_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('INVENTORY', 'collector', operations)
 
 
-@query
+@print_log
 def inventory_cloud_service_type_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'cloud_service_type', {}, {'tags': 1})
 
@@ -359,8 +359,8 @@ def _change_tags(data):
     return new_dict
 
 
-def main(file_path, debug):
-    mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
+def main(file_path):
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, 'v1.10.1')
 
     # execute migration functions
     # identity service / 9 resources
@@ -401,7 +401,3 @@ def main(file_path, debug):
     inventory_region_tags_refactoring(mongo_client)
     inventory_collector_tags_refactoring(mongo_client)
     inventory_cloud_service_type_tags_refactoring(mongo_client)
-
-
-if __name__ == '__main__':
-    main(file_path=None, debug=False)
