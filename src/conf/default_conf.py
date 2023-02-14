@@ -2,6 +2,9 @@
 BATCH_SIZE = 1000
 PAGE_SIZE = 100
 
+LOG_PATH = 'db_migration_log'
+LOG_BACKUP_PATH = 'db_migration_backup'
+
 # This is used because the database name is different depending on the environment.
 DB_NAME_MAP = {
     # DB ALIAS: DB NAME
@@ -30,6 +33,7 @@ HANDLER_DEFAULT_CONSOLE = {
 HANDLER_DEFAULT_FILE = {
     'class': 'logging.handlers.RotatingFileHandler',
     'filename': '',
+    'mode': 'w+',
     'filters': [],
     'formatter': 'file',
     'maxBytes': 10485760,  # 10 MB
@@ -53,7 +57,7 @@ FORMATTER_DEFAULT_TMPL = {
 }
 
 LOGGER_DEFAULT_TMPL = {
-    'level': 'INFO',
+    'level': 'DEBUG',
     'propagate': True,
     'handlers': ['console', 'file']
 }

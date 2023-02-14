@@ -25,12 +25,11 @@ The contents included in config yml:\n
 @click.command(help=_help)
 @click.argument('version')
 @click.option('-f', '--file', 'file_path', type=click.Path(exists=True), help='Config file (YAML)', required=True)
-@click.option('-d', '--debug', is_flag=True, help='Enable debug mode')
-def migrate(version, file_path=None, debug=False):
-    set_logger(version, file_path, debug)
+def main(version, file_path=None):
+    set_logger(version, file_path)
 
     module = _get_module(version)
-    getattr(module, 'main')(file_path, debug)
+    getattr(module, 'main')(file_path)
 
 
 def _change_version_name(version: str):
@@ -43,4 +42,4 @@ def _get_module(version):
 
 
 if __name__ == '__main__':
-    migrate()
+    main()

@@ -2,12 +2,12 @@ import logging
 from conf import DEFAULT_LOGGER
 from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
-@query
+@print_log
 def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'record', {}, {'_id': 1}):
@@ -21,10 +21,10 @@ def inventory_record_delete_project_id(mongo_client: MongoCustomClient):
             item_count += 1
 
         mongo_client.update_many('INVENTORY', 'record', query_filter, {"$unset": {"project_id": ""}}, upsert=True)
-        _LOGGER.debug(f'Total Count : {item_count}')
+        _LOGGER.info(f'Total Count : {item_count}')
 
 
-@query
+@print_log
 def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClient):
     item_count = 0
     for items in mongo_client.find_by_pagination('INVENTORY', 'cloud_service_tag', {}, {'_id': 1}):
@@ -39,41 +39,41 @@ def inventory_cloud_service_tag_delete_project_id(mongo_client: MongoCustomClien
 
         mongo_client.update_many('INVENTORY', 'cloud_service_tag', query_filter, {"$unset": {"project_id": ""}},
                                  upsert=True)
-        _LOGGER.debug(f'Total Count : {item_count}')
+        _LOGGER.info(f'Total Count : {item_count}')
 
 
-@query
+@print_log
 def inventory_cloud_service_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'cloud_service')
 
 
-@query
+@print_log
 def inventory_cloud_service_tag_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'cloud_service_tag')
 
 
-@query
+@print_log
 def inventory_collection_state_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'collection_state')
 
 
-@query
+@print_log
 def inventory_record_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'record')
 
 
-@query
+@print_log
 def inventory_cloud_service_type_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'cloud_service_type')
 
 
-@query
+@print_log
 def inventory_region_drop_indexes(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'region')
 
 
-def main(file_path, debug):
-    mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
+def main(file_path):
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, 'v1.10.4')
 
     inventory_record_delete_project_id(mongo_client)
     inventory_cloud_service_tag_delete_project_id(mongo_client)

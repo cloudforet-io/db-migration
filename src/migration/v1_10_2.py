@@ -2,12 +2,12 @@ import logging
 from conf import DEFAULT_LOGGER
 from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
-from lib.util import query
+from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
-@query
+@print_log
 def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
     items = mongo_client.find('INVENTORY', 'cloud_service', {}, {'provider': 1, 'tags': 1})
     operations = []
@@ -27,7 +27,7 @@ def inventory_cloud_service_tags_refactoring(mongo_client: MongoCustomClient):
     mongo_client.bulk_write('INVENTORY', 'cloud_service', operations)
 
 
-@query
+@print_log
 def inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_client: MongoCustomClient):
     provider = "azure"
     cloud_service_type = "VirtualMachine"
@@ -37,25 +37,25 @@ def inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_cli
                                                             "cloud_service_type": cloud_service_type})
 
 
-@query
+@print_log
 def identity_service_account_set_additional_fields(mongo_client: MongoCustomClient):
     mongo_client.update_many('IDENTITY', 'service_account', {"service_account_type": {"$ne": "TRUSTED"}},
                              {"$set": {'service_account_type': 'GENERAL', 'scope': 'PROJECT'}}, upsert=True)
 
 
-@query
+@print_log
 def identity_provider_delete_providers(mongo_client: MongoCustomClient):
     mongo_client.delete_many('IDENTITY', 'provider', {"provider": "aws"})
     mongo_client.delete_many('IDENTITY', 'provider', {"provider": "google_cloud"})
     mongo_client.delete_many('IDENTITY', 'provider', {"provider": "aws"})
 
 
-@query
+@print_log
 def file_manager_file_delete_all_files(mongo_client: MongoCustomClient):
     mongo_client.delete_many('FILE_MANAGER', 'file', {})
 
 
-@query
+@print_log
 def inventory_record_delete_wrong_records(mongo_client: MongoCustomClient):
     cloud_service_ids = []
     items = mongo_client.find('INVENTORY', 'cloud_service',
@@ -83,7 +83,8 @@ def inventory_record_delete_wrong_records(mongo_client: MongoCustomClient):
         cloud_service_ids.append(item['cloud_service_id'])
 
     items = mongo_client.find('INVENTORY', 'cloud_service',
-                              {'provider': 'aws', 'cloud_service_group': 'DirectConnect', 'cloud_service_type': 'DirectConnectGateway'},
+                              {'provider': 'aws', 'cloud_service_group': 'DirectConnect',
+                               'cloud_service_type': 'DirectConnectGateway'},
                               {'cloud_service_id': 1})
     for item in items:
         cloud_service_ids.append(item['cloud_service_id'])
@@ -135,8 +136,8 @@ def _change_tags_to_list_of_dict(dict_values: dict, provider: str) -> list:
     return tags
 
 
-def main(file_path, debug):
-    mongo_client: MongoCustomClient = MongoCustomClient(file_path, debug)
+def main(file_path):
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, 'v1.10.2')
     inventory_cloud_service_tags_refactoring(mongo_client)
     inventory_cloud_service_delete_vm_instance_with_specific_plugin_id(mongo_client)
     identity_service_account_set_additional_fields(mongo_client)
