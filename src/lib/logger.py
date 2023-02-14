@@ -1,3 +1,4 @@
+import sys
 import logging
 import logging.config
 import copy
@@ -32,9 +33,8 @@ def set_logger(version: str, file_path: str = None):
 def _set_config(version, file_path):
     global_log_conf = LOG
     external_log_dir_path = load_yaml_from_file(file_path).get('LOG_PATH', '')
-    external_log_backup_dir_path = load_yaml_from_file(file_path).get('LOG_BACKUP_PATH', '')
 
-    _set_default_logger(DEFAULT_LOGGER, version, external_log_dir_path, external_log_backup_dir_path)
+    _set_default_logger(DEFAULT_LOGGER, version, external_log_dir_path)
 
     if 'loggers' in global_log_conf:
         _set_loggers(global_log_conf['loggers'])
@@ -46,39 +46,40 @@ def _set_config(version, file_path):
         _set_formatters(global_log_conf['formatters'])
 
 
-def _set_default_logger(default_logger, version, external_log_dir_path, external_log_backup_dir_path):
+def _set_default_logger(default_logger, version, external_log_dir_path):
     _LOGGER['loggers'] = {default_logger: LOGGER_DEFAULT_TMPL}
     _LOGGER['formatters'] = FORMATTER_DEFAULT_TMPL
 
-    _set_log_file_path(version, external_log_dir_path, external_log_backup_dir_path)
+    _set_log_file_path(version, external_log_dir_path)
 
 
-def _set_log_file_path(version, external_log_dir_path, external_log_backup_dir_path):
+def _set_log_file_path(version, external_log_dir_path):
     home = os.path.expanduser("~")
 
     file_path = f'{home}/{LOG_PATH}/{version}.log'
     if not external_log_dir_path:
         if not os.path.isdir(os.path.join(home, LOG_PATH)):
             os.mkdir(os.path.join(home, LOG_PATH))
-            os.mkdir(os.path.join(home, LOG_BACKUP_PATH))
+            os.mkdir(os.path.join(home, LOG_PATH, 'backup'))
     else:
-        file_path = _set_external_file_path(external_log_dir_path, external_log_backup_dir_path, version)
+        file_path = _set_external_file_path(external_log_dir_path, version)
 
     _LOGGER['handlers']['file']['filename'] = file_path
 
 
-def _set_external_file_path(external_file_path, external_log_backup_dir_path, version):
+def _set_external_file_path(external_file_path, version):
     file_path = f'{external_file_path}/{version}.log'
 
     if os.path.exists(file_path):
         logs = [log for log in os.listdir(external_file_path) if version in log]
         target_log = sorted(logs)[-1]
 
-        _check_duplicated_migration(external_file_path, external_log_backup_dir_path, target_log)
+        _check_duplicated_migration(external_file_path, target_log)
 
     if not os.path.isdir(external_file_path):
         os.mkdir(external_file_path)
-        os.mkdir(external_log_backup_dir_path)
+        os.mkdir(os.path.join(external_file_path, 'backup'))
+
     return file_path
 
 
@@ -123,23 +124,24 @@ def _set_formatters(formatters):
         _LOGGER['formatters'][_formatter] = _default
 
 
-def _check_duplicated_migration(external_file_path, external_log_backup_dir_path, file_path):
+def _check_duplicated_migration(external_file_path, file_path):
     while True:
         answer = prompt(f'Previous db-migration history exists. Would you like to migrate?({file_path}) (Y/N)? : ')
 
         if answer in ['Y', 'y']:
             today = datetime.today().strftime('%Y%m%d.%H%m%S')
             version, subfix = file_path.split('.log')
-            saved_file_path = f'{version}.{today}.log'
+            saved_file_name = f'{version}.{today}.log'
             old_path = os.path.join(external_file_path, file_path)
-            new_path = os.path.join(external_log_backup_dir_path, saved_file_path)
+            new_path = os.path.join(external_file_path, 'backup', saved_file_name)
             shutil.copyfile(old_path, new_path)
 
             click.echo(f'The old log file has been saved. (saved file path={new_path})')
             break
 
         elif answer in ['N', 'n']:
-            raise ValueError('Migration has been canceled.')
+            click.echo(click.style('Migration is canceled.', fg='red'))
+            sys.exit(0)
 
         else:
             continue

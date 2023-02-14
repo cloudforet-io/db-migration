@@ -3,7 +3,6 @@ BATCH_SIZE = 1000
 PAGE_SIZE = 100
 
 LOG_PATH = 'db_migration_log'
-LOG_BACKUP_PATH = 'db_migration_backup'
 
 # This is used because the database name is different depending on the environment.
 DB_NAME_MAP = {
@@ -31,13 +30,11 @@ HANDLER_DEFAULT_CONSOLE = {
 }
 
 HANDLER_DEFAULT_FILE = {
-    'class': 'logging.handlers.RotatingFileHandler',
+    'level': 'DEBUG',
+    'formatter': 'standard',
+    'class': 'logging.FileHandler',
     'filename': '',
-    'mode': 'w+',
-    'filters': [],
-    'formatter': 'file',
-    'maxBytes': 10485760,  # 10 MB
-    'backupCount': 10
+    'mode': 'w'
 }
 
 HANDLER_DEFAULT_TMPL = {

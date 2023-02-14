@@ -48,12 +48,16 @@ def print_stage(action, name):
 def print_finish_stage(action=None, name=None, total_time=None):
     if action and name:
         if total_time:
-            title = f' [{action}] {name} ({total_time})'[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+            title = f' [{action}] {name} / Time: {total_time} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
         else:
-            title = f' [{action}] {name}'[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
+            title = f' [{action}] {name} '[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
     else:
         title = f''[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, '=')
-    click.echo(click.style(title, fg='bright_yellow', bold=True))
+
+    if action == 'ERROR':
+        click.echo(click.style(title, fg='bright_red', bold=True))
+    else:
+        click.echo(click.style(title, fg='bright_yellow', bold=True))
     click.echo('')
     click.echo('')
 
@@ -63,10 +67,13 @@ def print_log(func):
     def newFunc(*args, **kwargs):
         print_stage('EXECUTE', func.__name__)
         start = datetime.now()
-        func(*args, **kwargs)
-        end = datetime.now()
-        _LOGGER.info(f'Total time : {end - start}')
-        print_finish_stage('DONE', func.__name__, end - start)
+        try:
+            func(*args, **kwargs)
+            end = datetime.now()
+            print_finish_stage('DONE', func.__name__, end - start)
+        except Exception as e:
+            _LOGGER.error(e, exc_info=True)
+            print_finish_stage('ERROR', func.__name__)
 
     return newFunc
 
