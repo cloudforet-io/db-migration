@@ -10,6 +10,13 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 @print_log
+def repository_services_remove_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes('REPOSITORY', 'plugin')
+    mongo_client.drop_indexes('REPOSITORY', 'policy')
+    mongo_client.drop_indexes('REPOSITORY', 'schema')
+
+
+@print_log
 def monitoring_alert_number_remove_collection(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('MONITORING', 'alert_number')
 
@@ -146,6 +153,9 @@ def string_to_hash(str_value: str) -> str:
 
 def main(file_path):
     mongo_client: MongoCustomClient = MongoCustomClient(file_path, 'v1.11.0')
+
+    # remove index of repository services
+    repository_services_remove_indexes(mongo_client)
 
     # refactor alert_number
     monitoring_alert_number_remove_collection(mongo_client)
