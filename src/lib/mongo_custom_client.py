@@ -125,14 +125,14 @@ class MongoCustomClient(object):
             f'- projection: {projection}\n\t'
             f'- show_progress: {show_progress}')
 
-        total_count = 0
-
         if projection is None:
             projection = {}
+
         collection = self._get_collection(db_name, col_name)
 
-        if show_progress:
-            total_count = self.count(db_name, col_name, q_filter)
+        total_count = self.count(db_name, col_name, q_filter)
+        if total_count == 0:
+            return []
 
         if isinstance(collection, pymongo.collection.Collection):
             page_num = 0
@@ -145,20 +145,17 @@ class MongoCustomClient(object):
                 current_count += len(items)
                 if len(items) == 0:
                     if total_count != current_count:
-                        count_diff = total_count - current_count
-                        count_diff_str = self._create_count_diff_str(count_diff)
-                        _LOGGER.error(
-                            f'There is a change in the number of data. '
-                            f'(expected count - actual count = {count_diff_str})')
+                        _LOGGER.error(f'Loop failed for an unknown reason.\n\t'
+                                      f'- total_count: {total_count}\n\t'
+                                      f'- current_count: {current_count}\n\t'
+                                      f'- skip_size: {skip_size}\n\t'
+                                      f'- page_size: {self.page_size}\n\t'
+                                      f'- q_filter: {q_filter}\n\t'
+                                      f'- projection: {projection}')
                     break
 
-                try:
-                    current_percent = round(current_count / total_count * 100, 2)
-                except ZeroDivisionError:
-                    _LOGGER.debug('No data available.')
-                    return []
-
                 if show_progress:
+                    current_percent = round(current_count / total_count * 100, 2)
                     _LOGGER.debug(
                         f'{db_name}.{col_name} Operated Count : {current_count}/{total_count} ({current_percent}%)')
 
@@ -281,15 +278,6 @@ class MongoCustomClient(object):
         for col_key, col_value in items:
             key[col_key] = col_value
         return key
-
-    @staticmethod
-    def _create_count_diff_str(count_diff):
-        if count_diff == 0:
-            return f'{count_diff}'
-        elif count_diff > 0:
-            return f'+{count_diff}'
-        else:
-            return f'-{abs(count_diff)}'
 
     def _view_yaml(self):
         yaml_str = yaml.dump(self.file_conf, allow_unicode=True, default_flow_style=False)

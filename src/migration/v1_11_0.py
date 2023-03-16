@@ -126,7 +126,7 @@ def inventory_cloud_service_refactor_data_structure(mongo_client: MongoCustomCli
 
 @print_log
 def cost_analysis_data_source_rule_set_rule_type(mongo_client: MongoCustomClient):
-    mongo_client.update_many('COST-ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
+    mongo_client.update_many('COST_ANALYSIS', 'data_source_rule', {"rule_type": {"$exists": False}},
                              {"$set": {'rule_type': 'MANAGED'}})
 
 
