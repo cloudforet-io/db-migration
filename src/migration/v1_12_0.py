@@ -58,6 +58,7 @@ def inventory_schedule_remove_index(mongo_client: MongoCustomClient):
     mongo_client.drop_indexes('INVENTORY', 'schedule')
 
 
+@print_log
 def inventory_collector_remove_schedule(mongo_client: MongoCustomClient):
     mongo_client.update_many('INVENTORY', 'collector', {},
                              {"$unset": {"schedule": ""}})
