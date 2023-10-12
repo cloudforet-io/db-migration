@@ -53,6 +53,16 @@ def cost_analysis_budget_drop(mongo_client: MongoCustomClient):
     mongo_client.drop_collection('COST-ANALYSIS', 'budget')
 
 
+@print_log
+def cost_analysis_job_drop(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection('COST-ANALYSIS', 'job')
+
+
+@print_log
+def cost_analysis_job_task_drop(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection('COST-ANALYSIS', 'job_task')
+
+
 # inventory
 @print_log
 def inventory_cloud_service_stats_drop(mongo_client: MongoCustomClient):
@@ -109,6 +119,8 @@ def main(file_path):
     cost_analysis_cost_query_set_drop(mongo_client)
     cost_analysis_cost_query_history_drop(mongo_client)
     cost_analysis_budget_drop(mongo_client)
+    cost_analysis_job_drop(mongo_client)
+    cost_analysis_job_task_drop(mongo_client)
 
     # inventory
     inventory_cloud_service_stats_drop(mongo_client)
