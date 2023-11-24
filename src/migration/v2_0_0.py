@@ -14,7 +14,7 @@ def cost_analysis_data_source_drop_indexes(mongo_client: MongoCustomClient):
 
 @print_log
 def inventory_cloud_service_query_set_change_keys_to_data_keys(mongo_client: MongoCustomClient):
-    cloud_service_query_sets = mongo_client.find('INVENTORY', 'cloud_service_query_sets', {}, {'_id': 1, 'keys': 1})
+    cloud_service_query_sets = mongo_client.find('INVENTORY', 'cloud_service_query_set', {}, {'_id': 1, 'keys': 1})
 
     operations = []
     for cloud_service_query in cloud_service_query_sets:
@@ -27,7 +27,7 @@ def inventory_cloud_service_query_set_change_keys_to_data_keys(mongo_client: Mon
             )
 
     if operations:
-        mongo_client.bulk_write('INVENTORY', 'cloud_service_query_sets', operations)
+        mongo_client.bulk_write('INVENTORY', 'cloud_service_query_set', operations)
 
 
 def main(file_path):
