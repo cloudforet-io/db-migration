@@ -40,6 +40,18 @@ class MongoCustomClient(object):
         if self._ask_valid_config(version):
             self._create_connection_pool()
 
+    def insert_one(self, db_name: str, col_name: str, q_create: dict, is_new: bool = False):
+        _LOGGER.debug(
+            f'insert_many:\n\t'
+            f'- db_name: {db_name}\n\t'
+            f'- col_name: {col_name}\n\t'
+            f'- q_create: {q_create}'
+            f'- is_new: {is_new}')
+
+        collection = self._get_collection(db_name, col_name, is_new)
+        if isinstance(collection, pymongo.collection.Collection):
+            collection.insert_one(q_create)
+
     def insert_many(self, db_name: str, col_name: str, records, is_new):
         _LOGGER.debug(
             f'insert_many:\n\t'
@@ -101,6 +113,19 @@ class MongoCustomClient(object):
             return collection.count_documents(q_filter)
         else:
             return 0
+
+    def find_one(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
+        _LOGGER.debug(
+            f'find_one:\n\t'
+            f'- db_name: {db_name}\n\t'
+            f'- col_name: {col_name}\n\t'
+            f'- q_filter: {q_filter}\n\t'
+            f'- projection: {projection}')
+        collection = self._get_collection(db_name, col_name)
+        if isinstance(collection, pymongo.collection.Collection):
+            return collection.find_one(q_filter)
+        # else:
+        #     return None
 
     def find(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
         _LOGGER.debug(
