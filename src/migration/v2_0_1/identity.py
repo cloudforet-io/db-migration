@@ -538,6 +538,21 @@ def identity_user_refactoring(mongo_client, domain_id_param):
         )
 
 
+def drop_collections(mongo_client):
+    # drop role after refactoring role_binding
+    collections = ["role", "domain_owner", "policy", "provider", "a_p_i_key"]
+    for collection in collections:
+        mongo_client.drop_collection('IDENTITY', collection)
+
+
+def update_domain(mongo_client, domain_id_param, domain_tags):
+    set_param = {'$set':{}}
+    tags = domain_tags
+    tags.update({'complate_migration':True})
+    set_param['$set'].update({'tags': tags})
+    mongo_client.update_one('IDENTITY', 'domain', {'domain_id':domain_id_param}, set_param)
+
+
 def main(mongo_client, domain_id):
     # domain, external_auth
     identity_domain_refactoring_and_external_auth_creating(mongo_client, domain_id)
@@ -557,9 +572,5 @@ def main(mongo_client, domain_id):
 
     # user
     identity_user_refactoring(mongo_client, domain_id)
-
-    # drop role after refactoring role_binding
-    collections = ["role", "domain_owner", "policy", "provider", "a_p_i_key"]
-    drop_collections(mongo_client, collections)
 
     return WORKSPACE_MAP, PROJECT_MAP

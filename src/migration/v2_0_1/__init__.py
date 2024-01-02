@@ -2,7 +2,7 @@ import logging
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
-from migration.v2_0_1 import board, repository, statistics, identity
+from migration.v2_0_1 import board, repository, statistics, identity, notification
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
@@ -24,7 +24,7 @@ def main(file_path):
     # plugin(No Changes)
 
     """identity"""
-    domain_items = mongo_client.find("IDENTITY", "domain", {}, {})
+    domain_items = mongo_client.find("IDENTITY", "domain", {'tags.complate_migration':{'$eq': None}}, {})
     for domain_info in domain_items:
         domain_id = domain_info["domain_id"]
         workspace_map, project_map = identity.main(mongo_client, domain_id)
@@ -42,3 +42,11 @@ def main(file_path):
         """secret"""
 
         """notification"""
+        notification.main(mongo_client, domain_id, project_map)
+
+        # change domain tags to complate
+        identity.update_domain(mongo_client, domain_id, domain_info['tags'])
+
+    ## POST-PROCESSING
+    # drop collections 
+    identity.drop_collections(mongo_client)
