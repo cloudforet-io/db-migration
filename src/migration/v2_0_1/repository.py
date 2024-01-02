@@ -37,22 +37,12 @@ def repository_plugin_update_drop_fields(mongo_client: MongoCustomClient):
 
 
 @print_log
-def repository_policy_drop_collection(mongo_client: MongoCustomClient):
-    mongo_client.drop_collection("REPOSITORY", "policy")
-
-
-@print_log
-def repository_repository_drop_collection(mongo_client: MongoCustomClient):
-    mongo_client.drop_collection("REPOSITORY", "repository")
-
-
-@print_log
-def repository_schema_drop_collection(mongo_client: MongoCustomClient):
-    mongo_client.drop_collection("REPOSITORY", "schema")
+def drop_collections(mongo_client):
+    # drop role after refactoring role_binding
+    collections = ["policy", "repository", "schema"]
+    for collection in collections:
+        mongo_client.drop_collection("REPOSITORY", collection)
 
 
 def main(mongo_client):
     repository_plugin_update_drop_fields(mongo_client)
-    repository_policy_drop_collection(mongo_client)
-    repository_repository_drop_collection(mongo_client)
-    repository_schema_drop_collection(mongo_client)

@@ -26,7 +26,7 @@ def board_post_update_fields(mongo_client: MongoCustomClient):
 
 
 @print_log
-def board_board_drop_collection(mongo_client: MongoCustomClient):
+def drop_collections(mongo_client: MongoCustomClient):
     mongo_client.drop_collection("BOARD", "board")
 
 
@@ -43,5 +43,4 @@ def board_post_drop_fields(mongo_client: MongoCustomClient):
 
 def main(mongo_client):
     board_post_update_fields(mongo_client)
-    board_board_drop_collection(mongo_client)
     board_post_drop_fields(mongo_client)
