@@ -24,7 +24,7 @@ def main(file_path):
     # plugin(No Changes)
 
     """identity"""
-    domain_items = mongo_client.find("IDENTITY", "domain", {'tags.complate_migration':{'$eq': None}}, {})
+    domain_items = mongo_client.find("IDENTITY", "domain", {'tags.migration_complete':{'$eq': None}}, {})
     for domain_info in domain_items:
         domain_id = domain_info["domain_id"]
         workspace_map, project_map = identity.main(mongo_client, domain_id)
@@ -44,7 +44,7 @@ def main(file_path):
         """notification"""
         notification.main(mongo_client, domain_id, project_map)
 
-        # change domain tags to complate
+        # change domain tags to complete
         identity.update_domain(mongo_client, domain_id, domain_info['tags'])
 
     ## POST-PROCESSING

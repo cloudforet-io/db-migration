@@ -29,12 +29,6 @@ PROJECT_MAP = {
 
 
 @print_log
-def drop_collections(mongo_client, collections):
-    for collection in collections:
-        mongo_client.drop_collection("IDENTITY", collection)
-
-
-@print_log
 def identity_domain_refactoring_and_external_auth_creating(
     mongo_client: MongoCustomClient, domain_id_param
 ):
@@ -548,7 +542,7 @@ def drop_collections(mongo_client):
 def update_domain(mongo_client, domain_id_param, domain_tags):
     set_param = {'$set':{}}
     tags = domain_tags
-    tags.update({'complate_migration':True})
+    tags.update({'migration_complete':True})
     set_param['$set'].update({'tags': tags})
     mongo_client.update_one('IDENTITY', 'domain', {'domain_id':domain_id_param}, set_param)
 
