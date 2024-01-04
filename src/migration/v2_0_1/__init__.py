@@ -3,17 +3,18 @@ import logging
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
 from migration.v2_0_1 import (
-    board,
-    cost_analysis,
-    dashboard,
-    file_manager,
     identity,
+    dashboard,
+    secret,
     monitoring,
     notification,
-    plugin,
+    board,
     repository,
-    secret,
+    file_manager,
     statistics,
+    plugin,
+    cost_analysis,
+    inventory,
 )
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
@@ -22,6 +23,8 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 def main(file_path):
     mongo_client: MongoCustomClient = MongoCustomClient(file_path, "v2.0.1")
 
+    # Step 1: Migration for Identity, Dashboard, Secret, Monitoring, Notification
+    # with dependency of project_map
     """identity"""
     domain_items = mongo_client.find(
         "IDENTITY", "domain", {"tags.migration_complete": {"$eq": None}}, {}
@@ -54,14 +57,14 @@ def main(file_path):
         # change domain tags to complete
         identity.update_domain(mongo_client, domain_id, domain_info["tags"])
 
-    ## POST-PROCESSING
+    # Step 2: Migration for Board, Repository, Statistics, Plugin
+    # without dependency of project_map
     """board"""
     board.main(mongo_client)
 
     """repository"""
     repository.main(mongo_client)
 
-    # w/o dependency of project_map
     """file manager without workspace_id"""
     file_manager.file_update_fields(mongo_client)
     file_manager.file_delete_documents(mongo_client)
@@ -69,6 +72,11 @@ def main(file_path):
     """monitoring without workspace_id"""
     monitoring.event_rule_update_fields(mongo_client)
     monitoring.alert_update_fields(mongo_client)
+
+    """inventory"""
+    inventory.cloud_service_report_update_fields(mongo_client)
+    inventory.collector_update_fields(mongo_client)
+    inventory.collector_rule_update_fields(mongo_client)
 
     # drop collections
     board.drop_collections(mongo_client)
@@ -79,30 +87,28 @@ def main(file_path):
     secret.drop_collections(mongo_client)
     plugin.drop_collections(mongo_client)
     dashboard.drop_collections(mongo_client)
+    inventory.drop_collections(mongo_client)
     cost_analysis.drop_collections(mongo_client)
 
-    #### migration2, 3 steps
-    # domain_items = mongo_client.find(
-    #     "IDENTITY", "domain", {"tags.migration_complete": {"$eq": None}}, {}
-    # )
-    # for domain_info in domain_items:
-    #     domain_id = domain_info["domain_id"]
-    #     tags = domain_info.get("tags")
-    #
-    #     workspace_mode = False
-    #     if tags.get("workspace_mode") == "multi":
-    #         workspace_mode = True
-    #
-    #     workspace_map, project_map = identity.create_workspace_project_map(
-    #         mongo_client, domain_id, workspace_mode
-    #     )
-    #     print(workspace_map)
-    #     print(project_map)
+    # Step 3: Migration for Inventory and Cost Analysis
+    # with dependency of project_map
+    domain_items = mongo_client.find("IDENTITY", "domain", {}, {})
+    for domain_info in domain_items:
+        domain_id = domain_info["domain_id"]
+        tags = domain_info.get("tags")
 
-    # """inventory"""
+        workspace_mode = False
+        if tags.get("workspace_mode") == "multi":
+            workspace_mode = True
 
-    # step 3
-    # """cost analysis"""
-    # cost_analysis.main(
-    #     mongo_client, domain_id, workspace_map, project_map, workspace_mode
-    # )
+        workspace_map, project_map = identity.create_workspace_project_map(
+            mongo_client, domain_id, workspace_mode
+        )
+
+        """inventory"""
+        inventory.main(mongo_client, domain_id, project_map)
+
+        """cost analysis"""
+        cost_analysis.main(
+            mongo_client, domain_id, workspace_map, project_map, workspace_mode
+        )

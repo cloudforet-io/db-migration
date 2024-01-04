@@ -59,7 +59,7 @@ def identity_domain_refactoring_and_external_auth_creating(
                 "plugin_info": plugin_info,
                 "updated_at": created_at,
             }
-            
+
             mongo_client.insert_one("IDENTITY", "external_auth", params, is_new=True)
 
         if "config" in domain.keys() and "plugin_info" in domain.keys():
@@ -154,9 +154,8 @@ def identity_project_refactoring(mongo_client: MongoCustomClient, domain_id_para
             set_params = {
                 "$set": {
                     "project_type": "PRIVATE",
-                }, "$unset": {
-                    "project_group": 1
-                }
+                },
+                "$unset": {"project_group": 1},
             }
 
             project_id = project["project_id"]
@@ -573,10 +572,6 @@ def create_workspace_project_map(
     workspace_infos = mongo_client.find(
         "IDENTITY", "workspace", {"domain_id": domain_id_param}, {}
     )
-    workspace_id = ""
-    project_group_id = ""
-    project_id = ""
-
     for workspace_info in workspace_infos:
         workspace_id = workspace_info["workspace_id"]
         domain_id = workspace_info["domain_id"]
@@ -623,10 +618,9 @@ def main(mongo_client, domain_id, workspace_mode):
 
     # workspace, project_group
     identity_project_group_refactoring_and_workspace_creating(mongo_client, domain_id)
-    print(WORKSPACE_MAP)
+
     # project
     identity_project_refactoring(mongo_client, domain_id)
-    print(">>>", PROJECT_MAP)
 
     # service_account, trusted_account
     identity_service_account_and_trusted_account_creating(mongo_client, domain_id)
