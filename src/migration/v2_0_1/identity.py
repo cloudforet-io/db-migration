@@ -59,7 +59,7 @@ def identity_domain_refactoring_and_external_auth_creating(
                 "plugin_info": plugin_info,
                 "updated_at": created_at,
             }
-            # TODO : plugin_info 스펙 변경이 있는 지 확인이 필요함
+            
             mongo_client.insert_one("IDENTITY", "external_auth", params, is_new=True)
 
         if "config" in domain.keys() and "plugin_info" in domain.keys():
@@ -363,7 +363,7 @@ def identity_service_account_and_trusted_account_creating(
                 workspace_id = PROJECT_MAP[domain_id].get(project_id)
             else:
                 # has no project too, create new project at first workspace
-                workspace_id = list(PROJECT_MAP[domain_id][0].values())[0]
+                workspace_id = list(PROJECT_MAP[domain_id].values())[0]
                 project_id = _create_unmanaged_sa_project(
                     domain_id, workspace_id, mongo_client
                 )
@@ -579,7 +579,7 @@ def create_workspace_project_map(
         workspace_id = workspace_info["workspace_id"]
         domain_id = workspace_info["domain_id"]
 
-        if workspace_mode == "multi":
+        if workspace_mode:
             if domain_id not in WORKSPACE_MAP["multi"].keys():
                 WORKSPACE_MAP["multi"].update({domain_id: {}})
         else:

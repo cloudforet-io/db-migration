@@ -10,10 +10,14 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def cost_analysis_data_source_and_data_source_rule_refactoring(
-    mongo_client, domain_id_param
+    mongo_client, domain_id_param, project_map
 ):
-    # TODO : domain.tags에 따라 EA 계약인 경우 resource_group=WORKSPACE일 수 있다. 이 부분 추가 필요
     set_param = {"$set": {"resource_group": "DOMAIN", "workspace_id": "*"}}
+    # check EA.  
+    domain_tags = mongo_client.find_one("IDENTITY", "domain", {"domain_id": domain_id_param}, {})
+    if domain_tags.get("tags").get("is_EA"):
+        workspace_id = list(project_map[domain_id_param].values())[0]
+        set_param = {"$set": {"resource_group": "WORKSPACE", "workspace_id": workspace_id}}
     mongo_client.update_many("COST_ANALYSIS", "data_source", {}, set_param)
 
 
