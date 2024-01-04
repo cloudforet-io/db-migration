@@ -1,9 +1,15 @@
 import logging
+
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
 from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
+
+
+@print_log
+def drop_collections(mongo_client: MongoCustomClient):
+    mongo_client.drop_collection("BOARD", "board")
 
 
 @print_log
@@ -23,11 +29,6 @@ def board_post_update_fields(mongo_client: MongoCustomClient):
         {"resource_group": "PUBLIC"},
         {"$set": {"resource_group": "SYSTEM"}},
     )
-
-
-@print_log
-def drop_collections(mongo_client: MongoCustomClient):
-    mongo_client.drop_collection("BOARD", "board")
 
 
 @print_log
