@@ -1,9 +1,11 @@
 import logging
+from datetime import datetime
+
+from spaceone.core.utils import generate_id
+
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
 from lib.util import print_log
-from datetime import datetime
-from spaceone.core.utils import generate_id
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
@@ -292,9 +294,9 @@ def identity_service_account_and_trusted_account_creating(
             {},
         )
 
-        schema_id = ''
-        if trusted_secret.get('schema'):
-            schema_id = _get_schema_to_schema_id(trusted_secret.get('schema'))
+        schema_id = ""
+        if trusted_secret.get("schema"):
+            schema_id = _get_schema_to_schema_id(trusted_secret.get("schema"))
 
         trusted_account_create = {
             "trusted_account_id": trusted_account_id,
@@ -396,7 +398,7 @@ def _create_unmanaged_sa_project(domain_id, workspace_id, mongo_client):
         "created_by": "spaceone",
         "workspace_id": workspace_id,
         "domain_id": domain_id,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow(),
     }
     mongo_client.insert_one("IDENTITY", "project", create_project_param, is_new=True)
     return project_id
@@ -512,10 +514,14 @@ def identity_user_refactoring(mongo_client, domain_id_param):
         )
         if role_binding_info:
             role_type = "DOMAIN_ADMIN"
-            role_id = role_binding_info['role_id']
+            role_id = role_binding_info["role_id"]
 
         set_param = {
-            "$set": {"auth_type": user_info["backend"], "role_type": role_type, "role_id": role_id},
+            "$set": {
+                "auth_type": user_info["backend"],
+                "role_type": role_type,
+                "role_id": role_id,
+            },
             "$unset": {"user_type": 1, "backend": 1},
         }
 
@@ -525,35 +531,53 @@ def identity_user_refactoring(mongo_client, domain_id_param):
 
 
 def _get_schema_to_schema_id(schema):
-    SCHEMA_MAP = []
-    return SCHEMA_MAP
+    schema_id = None
+    if schema == "azure_subscription_id":
+        schema_id = "azure-secret-subscription-id"
+    elif schema == "azure_client_secret":
+        schema_id = "azure-secret-client-secret"
+    elif schema == "google_oauth2_credentials":
+        schema_id = "google-secret-oauth2-credentials"
+    elif schema == "aws_assume_role" or schema == "aws_assume_role_with_external_id":
+        schema_id = "aws-secret-assume-role"
+    elif schema == "aws_access_key":
+        schema_id = "aws-secret-access-key"
+    elif schema == "google_project_id":
+        schema_id = "google-secret-project-id"
+    return schema_id
 
 
 def drop_collections(mongo_client):
     # drop role after refactoring role_binding
     collections = ["role", "domain_owner", "policy", "provider", "a_p_i_key"]
     for collection in collections:
-        mongo_client.drop_collection('IDENTITY', collection)
+        mongo_client.drop_collection("IDENTITY", collection)
 
 
 @print_log
 def update_domain(mongo_client, domain_id_param, domain_tags):
-    set_param = {'$set':{}}
+    set_param = {"$set": {}}
     tags = domain_tags
-    tags.update({'migration_complete':True})
-    set_param['$set'].update({'tags': tags})
-    mongo_client.update_one('IDENTITY', 'domain', {'domain_id':domain_id_param}, set_param)
+    tags.update({"migration_complete": True})
+    set_param["$set"].update({"tags": tags})
+    mongo_client.update_one(
+        "IDENTITY", "domain", {"domain_id": domain_id_param}, set_param
+    )
 
 
-def _create_workspace_project_map(mongo_client: MongoCustomClient, domain_id_param, workspace_mode):
-    workspace_infos = mongo_client.find('IDENTITY', 'workspace', {'domain_id':domain_id_param}, {})
-    workspace_id = ''
-    project_group_id = ''
-    project_id = ''
-    
+def create_workspace_project_map(
+    mongo_client: MongoCustomClient, domain_id_param, workspace_mode
+):
+    workspace_infos = mongo_client.find(
+        "IDENTITY", "workspace", {"domain_id": domain_id_param}, {}
+    )
+    workspace_id = ""
+    project_group_id = ""
+    project_id = ""
+
     for workspace_info in workspace_infos:
-        workspace_id = workspace_info['workspace_id']
-        domain_id = workspace_info['domain_id']
+        workspace_id = workspace_info["workspace_id"]
+        domain_id = workspace_info["domain_id"]
 
         if workspace_mode == "multi":
             if domain_id not in WORKSPACE_MAP["multi"].keys():
@@ -562,16 +586,20 @@ def _create_workspace_project_map(mongo_client: MongoCustomClient, domain_id_par
             if domain_id not in WORKSPACE_MAP["single"].keys():
                 WORKSPACE_MAP["single"].update({domain_id: ""})
 
-        project_infos = mongo_client.find('IDENTITY', 'project', {'workspace_id': workspace_id}, {})
+        project_infos = mongo_client.find(
+            "IDENTITY", "project", {"workspace_id": workspace_id}, {}
+        )
         for project_info in project_infos:
-            project_group_id = project_info['project_group_id']
-            project_id = project_info['project_id']
+            project_group_id = project_info["project_group_id"]
+            project_id = project_info["project_id"]
 
             if workspace_mode:
-                WORKSPACE_MAP["multi"][domain_id].update({project_group_id: workspace_id})
+                WORKSPACE_MAP["multi"][domain_id].update(
+                    {project_group_id: workspace_id}
+                )
             else:
                 WORKSPACE_MAP["single"][domain_id] = workspace_id
-            
+
             if domain_id not in PROJECT_MAP.keys():
                 PROJECT_MAP[domain_id] = {project_id: workspace_id}
             else:
@@ -581,9 +609,12 @@ def _create_workspace_project_map(mongo_client: MongoCustomClient, domain_id_par
 
 def main(mongo_client, domain_id, workspace_mode):
     # For idempotent
-    workspace_infos = mongo_client.find('IDENTITY', 'workspace', {'domain_id': domain_id}, {})
-    if workspace_infos:
-        return _create_workspace_project_map(mongo_client, domain_id, workspace_mode)
+    workspace_infos = mongo_client.find(
+        "IDENTITY", "workspace", {"domain_id": domain_id}, {"_id": 1}
+    )
+
+    if len([workspace_info for workspace_info in workspace_infos]) > 0:
+        return create_workspace_project_map(mongo_client, domain_id, workspace_mode)
 
     # domain, external_auth
     identity_domain_refactoring_and_external_auth_creating(mongo_client, domain_id)

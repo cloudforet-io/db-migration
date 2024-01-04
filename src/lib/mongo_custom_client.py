@@ -16,18 +16,16 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 class MongoCustomClient(object):
-
     def __init__(self, file_path: str = None, version: str = None):
         self.conn = None
         if file_path:
             self.file_conf = load_yaml_from_file(file_path)
-            self.batch_size = self.file_conf.get('BATCH_SIZE', BATCH_SIZE)
-            self.page_size = self.file_conf.get('PAGE_SIZE', PAGE_SIZE)
-            self.db_name_map = self.file_conf.get('DB_NAME_MAP', DB_NAME_MAP)
+            self.batch_size = self.file_conf.get("BATCH_SIZE", BATCH_SIZE)
+            self.page_size = self.file_conf.get("PAGE_SIZE", PAGE_SIZE)
+            self.db_name_map = self.file_conf.get("DB_NAME_MAP", DB_NAME_MAP)
 
-            print_stage('SET', 'CONFIG')
-            _LOGGER.debug(
-                f'config from external yaml applied (file_path={file_path})')
+            print_stage("SET", "CONFIG")
+            _LOGGER.debug(f"config from external yaml applied (file_path={file_path})")
             self._view_yaml()
 
         else:
@@ -35,18 +33,21 @@ class MongoCustomClient(object):
             self.batch_size = BATCH_SIZE
             self.page_size = PAGE_SIZE
             self.db_name_map = DB_NAME_MAP
-            _LOGGER.debug('conf from default conf')
+            _LOGGER.debug("conf from default conf")
 
         if self._ask_valid_config(version):
             self._create_connection_pool()
 
-    def insert_one(self, db_name: str, col_name: str, q_create: dict, is_new: bool = False):
+    def insert_one(
+        self, db_name: str, col_name: str, q_create: dict, is_new: bool = False
+    ):
         _LOGGER.debug(
-            f'insert_many:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_create: {q_create}'
-            f'- is_new: {is_new}')
+            f"insert_one:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_create: {q_create}"
+            f"- is_new: {is_new}"
+        )
 
         collection = self._get_collection(db_name, col_name, is_new)
         if isinstance(collection, pymongo.collection.Collection):
@@ -54,48 +55,68 @@ class MongoCustomClient(object):
 
     def insert_many(self, db_name: str, col_name: str, records, is_new):
         _LOGGER.debug(
-            f'insert_many:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- is_new: {is_new}')
+            f"insert_many:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- is_new: {is_new}"
+        )
 
         collection = self._get_collection(db_name, col_name, is_new)
         if isinstance(collection, pymongo.collection.Collection):
             collection.insert_many(records)
 
-    def update_many(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
+    def update_many(
+        self,
+        db_name: str,
+        col_name: str,
+        q_filter: dict,
+        q_update: dict,
+        upsert: bool = False,
+    ):
         _LOGGER.debug(
-            f'update_many:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- q_update: {q_update}\n\t'
-            f'- upsert: {upsert}')
+            f"update_many:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- q_update: {q_update}\n\t"
+            f"- upsert: {upsert}"
+        )
 
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
             collection.update_many(q_filter, q_update, upsert)
 
-    def update_one(self, db_name: str, col_name: str, q_filter: dict, q_update: dict, upsert: bool = False):
+    def update_one(
+        self,
+        db_name: str,
+        col_name: str,
+        q_filter: dict,
+        q_update: dict,
+        upsert: bool = False,
+    ):
         _LOGGER.debug(
-            f'update_one:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- q_update: {q_update}\n\t'
-            f'- upsert: {upsert}')
+            f"update_one:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- q_update: {q_update}\n\t"
+            f"- upsert: {upsert}"
+        )
 
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
             collection.update_one(q_filter, q_update, upsert)
 
-    def delete_many(self, db_name: str, col_name: str, q_filter: dict, q_options: dict = None):
+    def delete_many(
+        self, db_name: str, col_name: str, q_filter: dict, q_options: dict = None
+    ):
         _LOGGER.debug(
-            f'delete_many:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- q_options: {q_options}')
+            f"delete_many:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- q_options: {q_options}"
+        )
 
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -103,10 +124,11 @@ class MongoCustomClient(object):
 
     def count(self, db_name: str, col_name: str, q_filter: dict):
         _LOGGER.debug(
-            f'count:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}')
+            f"count:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}"
+        )
 
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -114,13 +136,16 @@ class MongoCustomClient(object):
         else:
             return 0
 
-    def find_one(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
+    def find_one(
+        self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}
+    ):
         _LOGGER.debug(
-            f'find_one:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- projection: {projection}')
+            f"find_one:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- projection: {projection}"
+        )
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
             return collection.find_one(q_filter)
@@ -129,11 +154,12 @@ class MongoCustomClient(object):
 
     def find(self, db_name: str, col_name: str, q_filter: dict, projection: dict = {}):
         _LOGGER.debug(
-            f'find:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- projection: {projection}')
+            f"find:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- projection: {projection}"
+        )
 
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -141,14 +167,22 @@ class MongoCustomClient(object):
         else:
             return []
 
-    def find_by_pagination(self, db_name: str, col_name: str, q_filter: dict, projection=None, show_progress=False):
+    def find_by_pagination(
+        self,
+        db_name: str,
+        col_name: str,
+        q_filter: dict,
+        projection=None,
+        show_progress=False,
+    ):
         _LOGGER.debug(
-            f'find_by_pagination:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- q_filter: {q_filter}\n\t'
-            f'- projection: {projection}\n\t'
-            f'- show_progress: {show_progress}')
+            f"find_by_pagination:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- q_filter: {q_filter}\n\t"
+            f"- projection: {projection}\n\t"
+            f"- show_progress: {show_progress}"
+        )
 
         if projection is None:
             projection = {}
@@ -164,35 +198,42 @@ class MongoCustomClient(object):
             current_count = 0
             while True:
                 skip_size = page_num * self.page_size
-                cursor = collection.find(q_filter, projection).skip(skip_size).limit(self.page_size)
+                cursor = (
+                    collection.find(q_filter, projection)
+                    .skip(skip_size)
+                    .limit(self.page_size)
+                )
 
                 items = list(cursor)
                 current_count += len(items)
                 if len(items) == 0:
                     if total_count != current_count:
-                        _LOGGER.error(f'Loop failed for an unknown reason.\n\t'
-                                      f'- total_count: {total_count}\n\t'
-                                      f'- current_count: {current_count}\n\t'
-                                      f'- skip_size: {skip_size}\n\t'
-                                      f'- page_size: {self.page_size}\n\t'
-                                      f'- q_filter: {q_filter}\n\t'
-                                      f'- projection: {projection}')
+                        _LOGGER.error(
+                            f"Loop failed for an unknown reason.\n\t"
+                            f"- total_count: {total_count}\n\t"
+                            f"- current_count: {current_count}\n\t"
+                            f"- skip_size: {skip_size}\n\t"
+                            f"- page_size: {self.page_size}\n\t"
+                            f"- q_filter: {q_filter}\n\t"
+                            f"- projection: {projection}"
+                        )
                     break
 
                 if show_progress:
                     current_percent = round(current_count / total_count * 100, 2)
                     _LOGGER.debug(
-                        f'{db_name}.{col_name} Operated Count : {current_count}/{total_count} ({current_percent}%)')
+                        f"{db_name}.{col_name} Operated Count : {current_count}/{total_count} ({current_percent}%)"
+                    )
 
                 yield items
                 page_num += 1
 
     def aggregate(self, db_name: str, col_name: str, pipeline: list):
         _LOGGER.debug(
-            f'aggregate:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- pipeline: {pipeline}'
+            f"aggregate:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- pipeline: {pipeline}"
         )
 
         collection = self._get_collection(db_name, col_name)
@@ -208,10 +249,10 @@ class MongoCustomClient(object):
 
     def get_indexes(self, db_name: str, col_name: str, comment=None):
         _LOGGER.debug(
-            f'get_indexes:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- comment: {comment}'
+            f"get_indexes:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- comment: {comment}"
         )
 
         results = []
@@ -220,22 +261,22 @@ class MongoCustomClient(object):
             indexes = collection.index_information(comment=comment)
 
             for raw_index in indexes:
-                items = indexes[raw_index]['key']
+                items = indexes[raw_index]["key"]
 
                 index = {
-                    'name': raw_index,
-                    'v': indexes[raw_index]['v'],
-                    'key': self._create_index_key(items)
+                    "name": raw_index,
+                    "v": indexes[raw_index]["v"],
+                    "key": self._create_index_key(items),
                 }
                 results.append(index)
         return results
 
     def drop_indexes(self, db_name: str, col_name: str, comment=None):
         _LOGGER.debug(
-            f'drop_indexes:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- comment: {comment}'
+            f"drop_indexes:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- comment: {comment}"
         )
 
         collection = self._get_collection(db_name, col_name)
@@ -244,9 +285,9 @@ class MongoCustomClient(object):
 
     def drop_collection(self, db_name: str, col_name: str):
         _LOGGER.debug(
-            f'drop_collection:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}'
+            f"drop_collection:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}"
         )
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -254,10 +295,10 @@ class MongoCustomClient(object):
 
     def distinct(self, db_name: str, col_name: str, key: str):
         _LOGGER.debug(
-            f'distinct:\n\t'
-            f'- db_name: {db_name}\n\t'
-            f'- col_name: {col_name}\n\t'
-            f'- key: {key}'
+            f"distinct:\n\t"
+            f"- db_name: {db_name}\n\t"
+            f"- col_name: {col_name}\n\t"
+            f"- key: {key}"
         )
         collection = self._get_collection(db_name, col_name)
         if isinstance(collection, pymongo.collection.Collection):
@@ -265,36 +306,40 @@ class MongoCustomClient(object):
 
     def _create_connection_pool(self):
         if self.file_conf:
-            connection_uri = self.file_conf.get('CONNECTION_URI')
+            connection_uri = self.file_conf.get("CONNECTION_URI")
         else:
             connection_uri = CONNECTION_URI
 
         if connection_uri is None:
-            raise ValueError(f'DB Connection URI is invalid. (uri = {connection_uri})')
+            raise ValueError(f"DB Connection URI is invalid. (uri = {connection_uri})")
 
-        self.conn = MongoClient(connection_uri, readPreference='primary')
-        _LOGGER.debug('Mongo DB connection successful')
+        self.conn = MongoClient(connection_uri, readPreference="primary")
+        _LOGGER.debug("Mongo DB connection successful")
         print_finish_stage()
 
-    def _get_collection(self, db: str, col_name: str, is_new: bool = False) -> [pymongo.collection.Collection, None]:
+    def _get_collection(
+        self, db: str, col_name: str, is_new: bool = False
+    ) -> [pymongo.collection.Collection, None]:
         try:
             db_name = self.db_name_map.get(db)
 
             if db_name is None:
-                raise TypeError(f'Does not found {db} key in DB_NAME_MAP')
+                raise TypeError(f"Does not found {db} key in DB_NAME_MAP")
 
             db_names = self.conn.list_database_names()
             if db_name not in db_names:
-                raise ValueError(f'Does not found database. (db = {db_name})')
+                raise ValueError(f"Does not found database. (db = {db_name})")
 
             if not is_new:
                 col_names = self.conn[db_name].list_collection_names()
                 if col_name not in col_names:
-                    raise ValueError(f'Dose not found collection. (db = {db_name}, collection = {col_name})')
+                    raise ValueError(
+                        f"Dose not found collection. (db = {db_name}, collection = {col_name})"
+                    )
             return self.conn[db_name][col_name]
 
         except Exception as e:
-            _LOGGER.debug(f'SKIP / {e}')
+            _LOGGER.debug(f"SKIP / {e}")
             return None
 
     @staticmethod
@@ -305,7 +350,9 @@ class MongoCustomClient(object):
         return key
 
     def _view_yaml(self):
-        yaml_str = yaml.dump(self.file_conf, allow_unicode=True, default_flow_style=False)
+        yaml_str = yaml.dump(
+            self.file_conf, allow_unicode=True, default_flow_style=False
+        )
         syntax = Syntax(yaml_str, "yaml", theme="monokai", line_numbers=True)
         console = Console()
         console.print(syntax)
@@ -314,17 +361,23 @@ class MongoCustomClient(object):
     def _ask_valid_config(version):
         while True:
             answer = prompt(
-                f'The current migration version is {version}. Do you want to run with that config? (Y/N)?')
+                f"The current migration version is {version}. Do you want to run with that config? (Y/N)?"
+            )
 
-            if answer in ['Y', 'y']:
+            if answer in ["Y", "y"]:
                 break
-            elif answer in ['N', 'n']:
-                click.echo(click.style('Migration is canceled. Please check the config and try again.', fg='red'))
+            elif answer in ["N", "n"]:
+                click.echo(
+                    click.style(
+                        "Migration is canceled. Please check the config and try again.",
+                        fg="red",
+                    )
+                )
                 sys.exit(0)
             else:
                 continue
 
-        if answer in ['Y', 'y']:
+        if answer in ["Y", "y"]:
             return True
         else:
             return False
