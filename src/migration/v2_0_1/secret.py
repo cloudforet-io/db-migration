@@ -92,7 +92,7 @@ def secret_trusted_secret_migration(mongo_client: MongoCustomClient, domain_id_p
         }
 
         mongo_client.update_one(
-            "SECRET", "secret", {"_id": trusted_secret_info["_id"]}, set_params
+            "SECRET", "trusted_secret", {"_id": trusted_secret_info["_id"]}, set_params
         )
 
 

@@ -154,6 +154,8 @@ def identity_project_refactoring(mongo_client: MongoCustomClient, domain_id_para
             set_params = {
                 "$set": {
                     "project_type": "PRIVATE",
+                }, "$unset": {
+                    "project_group": 1
                 }
             }
 
@@ -549,7 +551,7 @@ def _get_schema_to_schema_id(schema):
 
 def drop_collections(mongo_client):
     # drop role after refactoring role_binding
-    collections = ["role", "domain_owner", "policy", "provider", "a_p_i_key"]
+    collections = ["role", "domain_owner", "policy", "a_p_i_key"]
     for collection in collections:
         mongo_client.drop_collection("IDENTITY", collection)
 
