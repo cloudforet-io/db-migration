@@ -34,7 +34,7 @@ def secret_secret_migration(
         elif secret_info.get("service_account_id"):
             service_account_info = mongo_client.find_one(
                 "IDENTITY",
-                "service_account_id",
+                "service_account",
                 {
                     "domain_id": secret_info["domain_id"],
                     "service_account_id": secret_info["service_account_id"],
