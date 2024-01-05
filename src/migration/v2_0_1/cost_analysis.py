@@ -5,6 +5,7 @@ from pymongo import UpdateOne
 from spaceone.core.utils import generate_id
 
 from conf import DEFAULT_LOGGER
+from lib import MongoCustomClient
 from lib.util import print_log
 
 _LOGGER = logging.getLogger(DEFAULT_LOGGER)
@@ -12,7 +13,7 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def cost_analysis_data_source_and_data_source_rule_refactoring(
-        mongo_client, domain_id, project_map
+    mongo_client, domain_id, project_map
 ):
     set_param = {"$set": {"resource_group": "DOMAIN", "workspace_id": "*"}}
     domain_tags = mongo_client.find_one(
@@ -30,7 +31,7 @@ def cost_analysis_data_source_and_data_source_rule_refactoring(
 
 @print_log
 def cost_analysis_budget_and_budget_usage_refactoring(
-        mongo_client, domain_id, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     resource_group = ""
     workspace_id = ""
@@ -89,7 +90,7 @@ def cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_ma
             continue
 
         for workspace_id in list(
-                dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
+            dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
         ):
             _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
 
@@ -100,7 +101,7 @@ def cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_ma
 
 @print_log
 def cost_analysis_cost_refactoring(
-        mongo_client, domain_id, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
@@ -113,17 +114,17 @@ def cost_analysis_cost_refactoring(
         is_EA = True
 
     for costs_info in mongo_client.find_by_pagination(
-            "COST_ANALYSIS",
-            "cost",
-            {"domain_id": domain_id},
-            {
-                "_id": 1,
-                "workspace_id": 1,
-                "project_id": 1,
-                "project_group_id": 1,
-                "domain_id": 1,
-            }, show_progress=True
-            
+        "COST_ANALYSIS",
+        "cost",
+        {"domain_id": domain_id},
+        {
+            "_id": 1,
+            "workspace_id": 1,
+            "project_id": 1,
+            "project_group_id": 1,
+            "domain_id": 1,
+        },
+        show_progress=True,
     ):
         operations = []
         for cost_info in costs_info:
@@ -154,12 +155,11 @@ def cost_analysis_cost_refactoring(
             item_count += 1
 
         mongo_client.bulk_write("COST_ANALYSIS", "cost", operations)
-        _LOGGER.info(f"Total Count : {item_count}")
 
 
 @print_log
 def cost_analysis_monthly_cost_refactoring(
-        mongo_client, domain_id, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
@@ -172,16 +172,17 @@ def cost_analysis_monthly_cost_refactoring(
         is_EA = True
 
     for monthly_costs_info in mongo_client.find_by_pagination(
-            "COST_ANALYSIS",
-            "monthly_cost",
-            {"domain_id": domain_id},
-            {
-                "_id": 1,
-                "workspace_id": 1,
-                "project_id": 1,
-                "project_group_id": 1,
-                "domain_id": 1,
-            }, show_progress=True
+        "COST_ANALYSIS",
+        "monthly_cost",
+        {"domain_id": domain_id},
+        {
+            "_id": 1,
+            "workspace_id": 1,
+            "project_id": 1,
+            "project_group_id": 1,
+            "domain_id": 1,
+        },
+        show_progress=True,
     ):
         operations = []
 
@@ -215,7 +216,6 @@ def cost_analysis_monthly_cost_refactoring(
             item_count += 1
 
         mongo_client.bulk_write("COST_ANALYSIS", "monthly_cost", operations)
-        _LOGGER.info(f"Total Count : {item_count}")
 
 
 @print_log
@@ -245,21 +245,23 @@ def _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id):
     )
 
 
+@print_log
+def cost_analysis_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("COST_ANALYSIS", "*")
+
+
 def main(mongo_client, domain_id, workspace_map, project_map, workspace_mode):
+    cost_analysis_drop_indexes(mongo_client)
     cost_analysis_data_source_and_data_source_rule_refactoring(
         mongo_client, domain_id, project_map
     )
-
     cost_analysis_budget_and_budget_usage_refactoring(
         mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )
-
     cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_map)
-
     cost_analysis_cost_refactoring(
         mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )
-
     cost_analysis_monthly_cost_refactoring(
         mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )

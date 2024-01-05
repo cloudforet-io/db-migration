@@ -99,7 +99,13 @@ def _change_prefix(dashboard_id, prefix):
     return f"{prefix}-{hash_value}"
 
 
+@print_log
+def dashboard_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("DASHBOARD", "*")
+
+
 def main(mongo_client, domain_id, project_map):
+    dashboard_drop_indexes(mongo_client)
     dashboard_domain_and_project_dashboard_refactoring(
         mongo_client, domain_id, project_map
     )

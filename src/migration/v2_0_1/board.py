@@ -42,6 +42,12 @@ def board_post_drop_fields(mongo_client: MongoCustomClient):
     mongo_client.update_many("BOARD", "post", {}, params)
 
 
+@print_log
+def board_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("BOARD", "*")
+
+
 def main(mongo_client):
+    board_drop_indexes(mongo_client)
     board_post_update_fields(mongo_client)
     board_post_drop_fields(mongo_client)

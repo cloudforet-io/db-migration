@@ -57,10 +57,12 @@ def main(file_path):
 
     board.drop_collections(mongo_client)
     repository.drop_collections(mongo_client)
+    statistics.statistics_drop_indexes(mongo_client)
     statistics.drop_collections(mongo_client)
     identity.drop_collections(mongo_client)
     monitoring.drop_collections(mongo_client)
     secret.drop_collections(mongo_client)
+    plugin.plugin_drop_indexes(mongo_client)
     plugin.drop_collections(mongo_client)
     dashboard.drop_collections(mongo_client)
 
