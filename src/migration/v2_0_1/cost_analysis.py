@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def cost_analysis_data_source_and_data_source_rule_refactoring(
-    mongo_client, domain_id, project_map
+        mongo_client, domain_id, project_map
 ):
     set_param = {"$set": {"resource_group": "DOMAIN", "workspace_id": "*"}}
     domain_tags = mongo_client.find_one(
@@ -24,19 +24,19 @@ def cost_analysis_data_source_and_data_source_rule_refactoring(
             "$set": {"resource_group": "WORKSPACE", "workspace_id": workspace_id}
         }
 
-    mongo_client.update_many("COST-ANALYSIS", "data_source", {}, set_param)
-    mongo_client.update_many("COST-ANALYSIS", "data_source_rule", {}, set_param)
+    mongo_client.update_many("COST_ANALYSIS", "data_source", {}, set_param)
+    mongo_client.update_many("COST_ANALYSIS", "data_source_rule", {}, set_param)
 
 
 @print_log
 def cost_analysis_budget_and_budget_usage_refactoring(
-    mongo_client, domain_id, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     resource_group = ""
     workspace_id = ""
 
     budget_infos = mongo_client.find(
-        "COST-ANALYSIS", "budget", {"domain_id": domain_id}, {}
+        "COST_ANALYSIS", "budget", {"domain_id": domain_id}, {}
     )
     for budget_info in budget_infos:
         if budget_info.get("workspace_id"):
@@ -67,11 +67,11 @@ def cost_analysis_budget_and_budget_usage_refactoring(
         }
 
         mongo_client.update_one(
-            "COST-ANALYSIS", "budget", {"_id": budget_info["_id"]}, set_params
+            "COST_ANALYSIS", "budget", {"_id": budget_info["_id"]}, set_params
         )
 
         mongo_client.update_many(
-            "COST-ANALYSIS",
+            "COST_ANALYSIS",
             "budget_usage",
             {"budget_id": budget_info["budget_id"]},
             set_params,
@@ -81,7 +81,7 @@ def cost_analysis_budget_and_budget_usage_refactoring(
 @print_log
 def cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_map):
     cost_query_sets_info = mongo_client.find(
-        "COST-ANALYSIS", "cost_query_set", {"domain_id": domain_id}, {}
+        "COST_ANALYSIS", "cost_query_set", {"domain_id": domain_id}, {}
     )
 
     for cost_query_set_info in cost_query_sets_info:
@@ -89,18 +89,18 @@ def cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_ma
             continue
 
         for workspace_id in list(
-            dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
+                dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
         ):
             _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
 
         mongo_client.delete_many(
-            "COST-ANALYSIS", "cost_query_set", {"_id": cost_query_set_info["_id"]}
+            "COST_ANALYSIS", "cost_query_set", {"_id": cost_query_set_info["_id"]}
         )
 
 
 @print_log
 def cost_analysis_cost_refactoring(
-    mongo_client, domain_id, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
@@ -113,16 +113,16 @@ def cost_analysis_cost_refactoring(
         is_EA = True
 
     for costs_info in mongo_client.find_by_pagination(
-        "COST-ANALYSIS",
-        "cost",
-        {"domain_id": domain_id},
-        {
-            "_id": 1,
-            "workspace_id": 1,
-            "project_id": 1,
-            "project_group_id": 1,
-            "domain_id": 1,
-        },
+            "COST_ANALYSIS",
+            "cost",
+            {"domain_id": domain_id},
+            {
+                "_id": 1,
+                "workspace_id": 1,
+                "project_id": 1,
+                "project_group_id": 1,
+                "domain_id": 1,
+            },
     ):
         operations = []
         for cost_info in costs_info:
@@ -152,13 +152,13 @@ def cost_analysis_cost_refactoring(
 
             item_count += 1
 
-        mongo_client.bulk_write("COST-ANALYSIS", "cost", operations)
+        mongo_client.bulk_write("COST_ANALYSIS", "cost", operations)
         _LOGGER.info(f"Total Count : {item_count}")
 
 
 @print_log
 def cost_analysis_monthly_cost_refactoring(
-    mongo_client, domain_id, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
@@ -171,16 +171,16 @@ def cost_analysis_monthly_cost_refactoring(
         is_EA = True
 
     for monthly_costs_info in mongo_client.find_by_pagination(
-        "COST-ANALYSIS",
-        "monthly_cost",
-        {"domain_id": domain_id},
-        {
-            "_id": 1,
-            "workspace_id": 1,
-            "project_id": 1,
-            "project_group_id": 1,
-            "domain_id": 1,
-        },
+            "COST_ANALYSIS",
+            "monthly_cost",
+            {"domain_id": domain_id},
+            {
+                "_id": 1,
+                "workspace_id": 1,
+                "project_id": 1,
+                "project_group_id": 1,
+                "domain_id": 1,
+            },
     ):
         operations = []
 
@@ -213,7 +213,7 @@ def cost_analysis_monthly_cost_refactoring(
 
             item_count += 1
 
-        mongo_client.bulk_write("COST-ANALYSIS", "monthly_cost", operations)
+        mongo_client.bulk_write("COST_ANALYSIS", "monthly_cost", operations)
         _LOGGER.info(f"Total Count : {item_count}")
 
 
@@ -221,7 +221,7 @@ def cost_analysis_monthly_cost_refactoring(
 def drop_collections(mongo_client):
     collections = ["job", "job_task", "cost_query_history"]
     for collection in collections:
-        mongo_client.drop_collection("COST-ANALYSIS", collection)
+        mongo_client.drop_collection("COST_ANALYSIS", collection)
 
 
 def _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id):
@@ -240,7 +240,7 @@ def _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id):
     }
 
     mongo_client.insert_one(
-        "COST-ANALYSIS", "cost_query_set", create_cost_query_set_param, {}
+        "COST_ANALYSIS", "cost_query_set", create_cost_query_set_param, {}
     )
 
 

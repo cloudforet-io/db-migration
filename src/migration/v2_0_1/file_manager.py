@@ -10,7 +10,7 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 @print_log
 def file_update_fields(mongo_client: MongoCustomClient):
     mongo_client.update_many(
-        "FILE-MANAGER",
+        "FILE_MANAGER",
         "file",
         {},
         {
@@ -21,7 +21,7 @@ def file_update_fields(mongo_client: MongoCustomClient):
     )
 
     mongo_client.update_many(
-        "FILE-MANAGER",
+        "FILE_MANAGER",
         "file",
         {"resource_group": "PUBLIC"},
         {"$set": {"resource_group": "SYSTEM"}},
@@ -31,7 +31,7 @@ def file_update_fields(mongo_client: MongoCustomClient):
 @print_log
 def file_delete_documents(mongo_client: MongoCustomClient):
     mongo_client.delete_many(
-        "FILE-MANAGER",
+        "FILE_MANAGER",
         "file",
         {"file_type": "xlsx"},
     )
