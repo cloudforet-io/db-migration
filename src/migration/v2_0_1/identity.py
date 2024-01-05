@@ -45,6 +45,9 @@ def identity_domain_refactoring_and_external_auth_creating(
         created_at = domain["created_at"]
 
         plugin_info = domain.get("plugin_info", {})
+        if plugin_info.get("metadata"):
+            if options := plugin_info.get("options"):
+                plugin_info["metadata"].update(options)
         tags = domain.get("tags")
 
         if workspace_mode := tags.get("workspace_mode"):
