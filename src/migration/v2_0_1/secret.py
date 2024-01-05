@@ -19,7 +19,6 @@ def secret_secret_migration(
     for secret_info in mongo_client.find(
         "SECRET", "secret", {"domain_id": domain_id_param}, {}
     ):
-        # For idempotent
         if secret_info.get("workspace_id"):
             continue
 
@@ -73,7 +72,6 @@ def secret_trusted_secret_migration(mongo_client: MongoCustomClient, domain_id_p
     for trusted_secret_info in mongo_client.find(
         "SECRET", "trusted_secret", {"domain_id": domain_id_param}, {}
     ):
-        # For idempotent
         if trusted_secret_info.get("workspace_id"):
             continue
 
@@ -115,7 +113,6 @@ def _get_schema_to_schema_id(schema):
 
 @print_log
 def drop_collections(mongo_client):
-    # drop role after refactoring role_binding
     collections = ["secret_group", "secret_group_map"]
     for collection in collections:
         mongo_client.drop_collection("SECRET", collection)

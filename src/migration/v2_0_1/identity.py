@@ -1,4 +1,5 @@
 import logging
+
 from datetime import datetime
 
 from spaceone.core.utils import generate_id
@@ -144,7 +145,6 @@ def identity_project_refactoring(mongo_client: MongoCustomClient, domain_id_para
         "IDENTITY", "project", {"domain_id": domain_id_param}, {}
     )
 
-    # if projects does not exist.
     if not projects:
         _LOGGER.error(f"domain({domain_id_param}) has no projects.")
         return
@@ -277,14 +277,10 @@ def identity_service_account_and_trusted_account_creating(
         {"domain_id": domain_id_param, "service_account_type": "TRUSTED"},
         {},
     )
-    # create trusted_account using service_account_type and remove service_account_type
     for service_account_info in service_account_infos:
         domain_id = service_account_info["domain_id"]
-        # create trusted
         trusted_account_id = generate_id("ta")
 
-        # ref with trusted_secret. get trusted_secret using sa id.
-        # create new trusted_account then change service_account_id to trusted_account_id in trusted_secret.
         trusted_secret = mongo_client.find_one(
             "SECRET",
             "trusted_secret",
@@ -317,7 +313,6 @@ def identity_service_account_and_trusted_account_creating(
             "IDENTITY", "trusted_account", trusted_account_create, is_new=True
         )
 
-        # update trusted_service_account_id that has sa-account_id
         mongo_client.update_many(
             "IDENTITY",
             "service_account",
@@ -325,12 +320,10 @@ def identity_service_account_and_trusted_account_creating(
             {"$set": {"trusted_service_account_id": trusted_account_id}},
         )
 
-        # remove this
         mongo_client.delete_many(
             "IDENTITY", "service_account", {"_id": service_account_info["_id"]}
         )
 
-        # add trusted_account_id in trusted_secret
         mongo_client.update_one(
             "SECRET",
             "trusted_secret",
@@ -338,7 +331,6 @@ def identity_service_account_and_trusted_account_creating(
             {"$set": {"trusted_account_id": trusted_account_id}},
         )
 
-        # remove service_account_id in trusted_secret
         mongo_client.update_one(
             "SECRET",
             "trusted_secret",
@@ -346,24 +338,20 @@ def identity_service_account_and_trusted_account_creating(
             {"$unset": {"service_account_id": 1}},
         )
 
-    # non trusted type
     service_account_infos = mongo_client.find(
         "IDENTITY", "service_account", {"domain_id": domain_id_param}, {}
     )
     for service_account_info in service_account_infos:
         """check project_id"""
         if service_account_info.get("project_id"):
-            # has project_id
             project_id = service_account_info.get("project_id")
             workspace_id = PROJECT_MAP[domain_id].get(project_id)
         else:
             if service_account_info.get("project"):
-                # get project_id from project_info
                 project_info = service_account_info.get("project")
                 project_id = project_info("project_id")
                 workspace_id = PROJECT_MAP[domain_id].get(project_id)
             else:
-                # has no project too, create new project at first workspace
                 workspace_id = list(PROJECT_MAP[domain_id].values())[0]
                 project_id = _create_unmanaged_sa_project(
                     domain_id, workspace_id, mongo_client
@@ -389,7 +377,6 @@ def identity_service_account_and_trusted_account_creating(
 
 def _create_unmanaged_sa_project(domain_id, workspace_id, mongo_client):
     project_id = generate_id("project")
-    # create new project
     name = "unmanaged-sa-project"
 
     create_project_param = {
@@ -407,10 +394,6 @@ def _create_unmanaged_sa_project(domain_id, workspace_id, mongo_client):
 
 @print_log
 def identity_role_binding_refactoring(mongo_client, domain_id_param):
-    # role_id                    | role type
-    # "managed-domain-admin"     | "DOMAIN_ADMIN"
-    # "managed-workspace-owner"  | "WORKSPACE_OWNER"
-    # "managed-workspace-member" | "WORKSPACE_MEMBER"
     if not PROJECT_MAP.get(domain_id_param):
         _LOGGER.error(f"domain({domain_id_param}) has no projects.")
         return None
@@ -420,13 +403,8 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
     )
 
     for role_binding_info in role_binding_infos:
-        # role_id = ""
-        # role_type = ""
-        # workspace_id = ""
-        # resource_group = ""
         param_role_id = role_binding_info["role_id"]
 
-        # get role
         role_info = mongo_client.find_one(
             "IDENTITY", "role", {"role_id": param_role_id}, {}
         )
@@ -438,7 +416,6 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
             resource_group = "DOMAIN"
         else:
             resource_group = "WORKSPACE"
-            # check project_group info. if project_group not exists, WORKSPACE_MEMBER
             if not role_binding_info.get("project_group_id"):
                 role_id = "managed-workspace-member"
                 role_type = "WORKSPACE_MEMBER"
@@ -446,8 +423,6 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
                     role_binding_info.get("project_id")
                 )
             else:
-                # find project_group
-                # if there is no parent project group_id(it means root project group), it is workspace_owner
                 project_group_info = mongo_client.find_one(
                     "IDENTITY",
                     "project_group",
@@ -465,7 +440,6 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
                     role_id = "managed-workspace-member"
                     role_type = "WORKSPACE_MEMBER"
 
-        # change resource_id to user_id
         set_param = {
             "$set": {
                 "user_id": role_binding_info["resource_id"],
@@ -549,7 +523,6 @@ def _get_schema_to_schema_id(schema):
 
 
 def drop_collections(mongo_client):
-    # drop role after refactoring role_binding
     collections = ["role", "domain_owner", "policy", "a_p_i_key"]
     for collection in collections:
         mongo_client.drop_collection("IDENTITY", collection)
@@ -587,7 +560,7 @@ def create_workspace_project_map(
             "IDENTITY", "project", {"workspace_id": workspace_id}, {}
         )
         for project_info in project_infos:
-            project_group_id = project_info["project_group_id"]
+            project_group_id = project_info.get("project_group_id", None)
             project_id = project_info["project_id"]
 
             if workspace_mode:
@@ -605,7 +578,6 @@ def create_workspace_project_map(
 
 
 def main(mongo_client, domain_id, workspace_mode):
-    # For idempotent
     workspace_infos = mongo_client.find(
         "IDENTITY", "workspace", {"domain_id": domain_id}, {"_id": 1}
     )
@@ -613,22 +585,11 @@ def main(mongo_client, domain_id, workspace_mode):
     if len([workspace_info for workspace_info in workspace_infos]) > 0:
         return create_workspace_project_map(mongo_client, domain_id, workspace_mode)
 
-    # domain, external_auth
     identity_domain_refactoring_and_external_auth_creating(mongo_client, domain_id)
-
-    # workspace, project_group
     identity_project_group_refactoring_and_workspace_creating(mongo_client, domain_id)
-
-    # project
     identity_project_refactoring(mongo_client, domain_id)
-
-    # service_account, trusted_account
     identity_service_account_and_trusted_account_creating(mongo_client, domain_id)
-
-    # role_binding for user
     identity_role_binding_refactoring(mongo_client, domain_id)
-
-    # user
     identity_user_refactoring(mongo_client, domain_id)
 
     return WORKSPACE_MAP, PROJECT_MAP

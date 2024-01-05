@@ -27,20 +27,6 @@ def file_update_fields(mongo_client: MongoCustomClient):
         {"$set": {"resource_group": "SYSTEM"}},
     )
 
-    # mongo_client.update_many(
-    #     "FILE-MANAGER",
-    #     "file",
-    #     {},
-    #     {"$set": {"workspace_id": "*"}},
-    # )
-    #
-    # mongo_client.update_many(
-    #     "FILE-MANAGER",
-    #     "file",
-    #     {},
-    #     {"$unset": {"user_domain_id": 1}},
-    # )
-
 
 @print_log
 def file_delete_documents(mongo_client: MongoCustomClient):

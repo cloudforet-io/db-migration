@@ -42,7 +42,6 @@ def dashboard_domain_and_project_dashboard_refactoring(
                     dashboard_info.pop("project_dashboard_id", 1)
                     dashboard_info.pop("user_id", 1)
                     dashboard_info.pop("viewers", 1)
-
                 else:
                     dashboard_info["workspace_id"] = "*"
                     dashboard_info["project_id"] = "*"
@@ -58,7 +57,6 @@ def dashboard_domain_and_project_dashboard_refactoring(
                 mongo_client.insert_one(
                     "DASHBOARD", "public_dashboard", dashboard_info, is_new=True
                 )
-
             else:
                 if "project_id" in dashboard_info:
                     dashboard_info["workspace_id"] = project_map[domain_id][
@@ -70,7 +68,6 @@ def dashboard_domain_and_project_dashboard_refactoring(
 
                     dashboard_info.pop("project_dashboard_id", 1)
                     dashboard_info.pop("viewers", 1)
-
                 else:
                     dashboard_info["workspace_id"] = "*"
                     dashboard_info["private_dashboard_id"] = _change_prefix(
