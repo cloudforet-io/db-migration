@@ -122,7 +122,8 @@ def cost_analysis_cost_refactoring(
                 "project_id": 1,
                 "project_group_id": 1,
                 "domain_id": 1,
-            },
+            }, show_progress=True
+            
     ):
         operations = []
         for cost_info in costs_info:
@@ -180,7 +181,7 @@ def cost_analysis_monthly_cost_refactoring(
                 "project_id": 1,
                 "project_group_id": 1,
                 "domain_id": 1,
-            },
+            }, show_progress=True
     ):
         operations = []
 
