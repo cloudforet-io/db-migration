@@ -43,5 +43,11 @@ def drop_collections(mongo_client):
         mongo_client.drop_collection("REPOSITORY", collection)
 
 
+@print_log
+def repository_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("REPOSITORY", "*")
+
+
 def main(mongo_client):
+    repository_drop_indexes(mongo_client)
     repository_plugin_update_drop_fields(mongo_client)

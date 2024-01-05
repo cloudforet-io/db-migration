@@ -354,7 +354,13 @@ def monitoring_note_update_fields(
     mongo_client.bulk_write("MONITORING", "note", operations)
 
 
+@print_log
+def monitoring_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("MONITORING", "*")
+
+
 def main(mongo_client, domain_id, project_map, workspace_mode):
+    monitoring_drop_indexes(mongo_client)
     monitoring_project_alert_config_update_fields(mongo_client, domain_id, project_map)
     monitoring_event_rule_update_fields(mongo_client, domain_id, project_map)
     monitoring_webhook_update_fields(mongo_client, domain_id, project_map)

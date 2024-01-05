@@ -118,6 +118,12 @@ def drop_collections(mongo_client):
         mongo_client.drop_collection("SECRET", collection)
 
 
+@print_log
+def secret_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("SECRET", "*")
+
+
 def main(mongo_client: MongoCustomClient, domain_id_param, project_map):
+    secret_drop_indexes(mongo_client)
     secret_secret_migration(mongo_client, domain_id_param, project_map)
     secret_trusted_secret_migration(mongo_client, domain_id_param)

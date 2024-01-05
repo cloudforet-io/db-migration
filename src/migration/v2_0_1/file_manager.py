@@ -29,7 +29,13 @@ def file_update_fields(mongo_client: MongoCustomClient):
 
 
 @print_log
+def file_manager_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("FILE_MANAGER", "*")
+
+
+@print_log
 def file_delete_documents(mongo_client: MongoCustomClient):
+    file_manager_drop_indexes(mongo_client)
     mongo_client.delete_many(
         "FILE_MANAGER",
         "file",

@@ -77,21 +77,32 @@ def inventory_cloud_service_refactoring(
         "INVENTORY", "cloud_service", {"domain_id": domain_id}, {}
     )
 
-    for inventory_cloud_service_info in inventory_cloud_services_info:
-        if inventory_cloud_service_info.get("workspace_id"):
-            continue
+    for inventory_cloud_services_info in mongo_client.find_by_pagination(
+        "INVENTORY",
+        "cloud_service",
+        {"domain_id": domain_id},
+        {
+            "_id": 1,
+            "workspace_id": 1,
+            "project_id": 1,
+            "domain_id": 1,
+        },
+        show_progress=True,
+    ):
+        for inventory_cloud_service_info in inventory_cloud_services_info:
+            if inventory_cloud_service_info.get("workspace_id"):
+                continue
 
-        workspace_id = project_map[inventory_cloud_service_info["domain_id"]].get(
-            inventory_cloud_service_info["project_id"]
-        )
-        operations.append(
-            UpdateOne(
-                {"_id": inventory_cloud_service_info["_id"]},
-                {"$set": {"workspace_id": workspace_id}},
+            workspace_id = project_map[inventory_cloud_service_info["domain_id"]].get(
+                inventory_cloud_service_info["project_id"]
             )
-        )
-
-    mongo_client.bulk_write("INVENTORY", "cloud_service", operations)
+            operations.append(
+                UpdateOne(
+                    {"_id": inventory_cloud_service_info["_id"]},
+                    {"$set": {"workspace_id": workspace_id}},
+                )
+            )
+        mongo_client.bulk_write("INVENTORY", "cloud_service", operations)
 
 
 @print_log
@@ -119,7 +130,13 @@ def inventory_note_refactoring(mongo_client: MongoCustomClient, domain_id, proje
     mongo_client.bulk_write("INVENTORY", "note", operations)
 
 
+@print_log
+def inventory_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("INVENTORY", "*")
+
+
 def main(mongo_client: MongoCustomClient, domain_id, project_map):
+    inventory_drop_indexes(mongo_client)
     inventory_cloud_service_refactoring(mongo_client, domain_id, project_map)
     inventory_note_refactoring(mongo_client, domain_id, project_map)
     inventory_collector_drop_fields(mongo_client)

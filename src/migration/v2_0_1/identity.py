@@ -45,6 +45,9 @@ def identity_domain_refactoring_and_external_auth_creating(
         created_at = domain["created_at"]
 
         plugin_info = domain.get("plugin_info", {})
+        if plugin_info and plugin_info.get("metadata"):
+            if options := plugin_info.get("options"):
+                plugin_info["metadata"].update(options)
         tags = domain.get("tags")
 
         if workspace_mode := tags.get("workspace_mode"):
@@ -577,7 +580,14 @@ def create_workspace_project_map(
     return WORKSPACE_MAP, PROJECT_MAP
 
 
+@print_log
+def identity_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("IDENTITY", "*")
+
+
 def main(mongo_client, domain_id, workspace_mode):
+    identity_drop_indexes(mongo_client)
+
     workspace_infos = mongo_client.find(
         "IDENTITY", "workspace", {"domain_id": domain_id}, {"_id": 1}
     )

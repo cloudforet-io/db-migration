@@ -79,6 +79,12 @@ def notification_user_channel_migration(
             )
 
 
+@print_log
+def notification_drop_indexes(mongo_client: MongoCustomClient):
+    mongo_client.drop_indexes("NOTIFICATION", "*")
+
+
 def main(mongo_client, domain_id_param, project_map):
+    notification_drop_indexes(mongo_client)
     notification_project_channel_refactoring(mongo_client, domain_id_param, project_map)
     notification_user_channel_migration(mongo_client, domain_id_param)
