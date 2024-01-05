@@ -47,7 +47,15 @@ def identity_domain_refactoring_and_external_auth_creating(
         plugin_info = domain.get("plugin_info", {})
         if plugin_info and plugin_info.get("metadata"):
             if options := plugin_info.get("options"):
+                auth_type = plugin_info["metadata"].get("auth_type")
+                identity_provider, protocol = auth_type.split("_")
                 plugin_info["metadata"].update(options)
+                if validator := options.get("domain"):
+                    plugin_info.update({"validator": validator})
+                plugin_info["metadata"].update({
+                    "identity_provider":identity_provider,
+                    "protocol": protocol
+                })
         tags = domain.get("tags")
 
         if workspace_mode := tags.get("workspace_mode"):
