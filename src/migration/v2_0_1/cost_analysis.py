@@ -99,16 +99,9 @@ def cost_analysis_cost_query_set_refactoring(
         if cost_query_set_info.get("workspace_id"):
             continue
 
-        print("cost_query_set_info============", cost_query_set_info)
-
-        # TODO: As-Is
-        # for workspace_id in list(
-        #     project_map(list(project_map[cost_query_set_info["domain_id"]].values()))
-        # ):
-        #     _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
-
-        # TODO: To-Be
-        for workspace_id in project_map[cost_query_set_info["domain_id"]].values():
+        for workspace_id in list(
+            dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
+        ):
             _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
 
         mongo_client.delete_many(
