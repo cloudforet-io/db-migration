@@ -12,52 +12,45 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def cost_analysis_data_source_and_data_source_rule_refactoring(
-    mongo_client, domain_id_param, project_map
+    mongo_client, domain_id, project_map
 ):
     set_param = {"$set": {"resource_group": "DOMAIN", "workspace_id": "*"}}
-    # check EA.
     domain_tags = mongo_client.find_one(
-        "IDENTITY", "domain", {"domain_id": domain_id_param}, {}
+        "IDENTITY", "domain", {"domain_id": domain_id}, {}
     )
     if domain_tags.get("tags").get("is_EA"):
-        workspace_id = list(project_map[domain_id_param].values())[0]
+        workspace_id = list(project_map[domain_id].values())[0]
         set_param = {
             "$set": {"resource_group": "WORKSPACE", "workspace_id": workspace_id}
         }
 
-    # data_source
     mongo_client.update_many("COST-ANALYSIS", "data_source", {}, set_param)
-
-    # data_source_rule
     mongo_client.update_many("COST-ANALYSIS", "data_source_rule", {}, set_param)
 
 
 @print_log
 def cost_analysis_budget_and_budget_usage_refactoring(
-    mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     resource_group = ""
     workspace_id = ""
 
     budget_infos = mongo_client.find(
-        "COST-ANALYSIS", "budget", {"domain_id": domain_id_param}, {}
+        "COST-ANALYSIS", "budget", {"domain_id": domain_id}, {}
     )
     for budget_info in budget_infos:
-        # For idempotent
         if budget_info.get("workspace_id"):
             continue
 
-        # if project group id exists, resource_group = WORKSPACE, or PROJECT
         if not budget_info.get("project_group_id"):
             resource_group = "PROJECT"
             workspace_id = project_map[budget_info["domain_id"]].get(
                 budget_info.get("project_id", "-")
             )
         else:
-            # never happen
             if not budget_info.get("project_id"):
                 _LOGGER.error(
-                    f"Budget({budget_info['budget_id']}) has no project and project_group_id. (domain_id: {domain_id_param})"
+                    f"Budget({budget_info['budget_id']}) has no project and project_group_id. (domain_id: {domain_id})"
                 )
 
             resource_group = "WORKSPACE"
@@ -77,7 +70,6 @@ def cost_analysis_budget_and_budget_usage_refactoring(
             "COST-ANALYSIS", "budget", {"_id": budget_info["_id"]}, set_params
         )
 
-        # max under 20. so update_many.
         mongo_client.update_many(
             "COST-ANALYSIS",
             "budget_usage",
@@ -87,28 +79,18 @@ def cost_analysis_budget_and_budget_usage_refactoring(
 
 
 @print_log
-def cost_analysis_cost_query_set_refactoring(
-    mongo_client, domain_id_param, project_map
-):
+def cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_map):
     cost_query_sets_info = mongo_client.find(
-        "COST-ANALYSIS", "cost_query_set", {"domain_id": domain_id_param}, {}
+        "COST-ANALYSIS", "cost_query_set", {"domain_id": domain_id}, {}
     )
 
     for cost_query_set_info in cost_query_sets_info:
-        # For idempotent
         if cost_query_set_info.get("workspace_id"):
             continue
 
-        print("cost_query_set_info============", cost_query_set_info)
-
-        # TODO: As-Is
-        # for workspace_id in list(
-        #     project_map(list(project_map[cost_query_set_info["domain_id"]].values()))
-        # ):
-        #     _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
-
-        # TODO: To-Be
-        for workspace_id in project_map[cost_query_set_info["domain_id"]].values():
+        for workspace_id in list(
+            dict.fromkeys(list(project_map[cost_query_set_info["domain_id"]].values()))
+        ):
             _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id)
 
         mongo_client.delete_many(
@@ -118,14 +100,14 @@ def cost_analysis_cost_query_set_refactoring(
 
 @print_log
 def cost_analysis_cost_refactoring(
-    mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
     is_EA = False
 
     domain_tags = mongo_client.find_one(
-        "IDENTITY", "domain", {"domain_id": domain_id_param}, {}
+        "IDENTITY", "domain", {"domain_id": domain_id}, {}
     )
     if domain_tags.get("tags").get("is_EA"):
         is_EA = True
@@ -133,7 +115,7 @@ def cost_analysis_cost_refactoring(
     for costs_info in mongo_client.find_by_pagination(
         "COST-ANALYSIS",
         "cost",
-        {"domain_id": domain_id_param},
+        {"domain_id": domain_id},
         {
             "_id": 1,
             "workspace_id": 1,
@@ -144,17 +126,14 @@ def cost_analysis_cost_refactoring(
     ):
         operations = []
         for cost_info in costs_info:
-            # For idempotent
             if cost_info.get("workspace_id"):
                 continue
 
             if cost_info.get("project_id"):
-                # if project_id is not null
                 workspace_id = project_map[cost_info["domain_id"]].get(
                     cost_info.get("project_id")
                 )
             elif cost_info.get("project_group_id"):
-                # if project_id is null, project_group_id is not null
                 if workspace_mode:
                     workspace_id = workspace_map["multi"][cost_info["domain_id"]].get(
                         cost_info.get("project_group_id")
@@ -162,10 +141,8 @@ def cost_analysis_cost_refactoring(
                 else:
                     workspace_id = workspace_map["single"][cost_info["domain_id"]]
             else:
-                # if not exists both project_id, project_group_id
-                # check EA. if EA, then default workspace_id
                 if is_EA:
-                    workspace_id = list(project_map[domain_id_param].values())[0]
+                    workspace_id = list(project_map[domain_id].values())[0]
             set_params = {
                 "$set": {"workspace_id": workspace_id},
                 "$unset": {"project_group_id": 1},
@@ -181,14 +158,14 @@ def cost_analysis_cost_refactoring(
 
 @print_log
 def cost_analysis_monthly_cost_refactoring(
-    mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+    mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
     item_count = 0
     is_EA = False
 
     domain_tags = mongo_client.find_one(
-        "IDENTITY", "domain", {"domain_id": domain_id_param}, {}
+        "IDENTITY", "domain", {"domain_id": domain_id}, {}
     )
     if domain_tags.get("tags").get("is_EA"):
         is_EA = True
@@ -196,7 +173,7 @@ def cost_analysis_monthly_cost_refactoring(
     for monthly_costs_info in mongo_client.find_by_pagination(
         "COST-ANALYSIS",
         "monthly_cost",
-        {"domain_id": domain_id_param},
+        {"domain_id": domain_id},
         {
             "_id": 1,
             "workspace_id": 1,
@@ -208,17 +185,14 @@ def cost_analysis_monthly_cost_refactoring(
         operations = []
 
         for monthly_cost_info in monthly_costs_info:
-            # For idempotent
             if monthly_cost_info.get("workspace_id"):
                 continue
 
             if monthly_cost_info.get("project_id"):
-                # if project_id is not null
                 workspace_id = project_map[monthly_cost_info["domain_id"]].get(
                     monthly_cost_info.get("project_id")
                 )
             elif monthly_cost_info.get("project_group_id"):
-                # if project_id is null, project_group_id is not null
                 if workspace_mode:
                     workspace_id = workspace_map["multi"][
                         monthly_cost_info["domain_id"]
@@ -228,10 +202,8 @@ def cost_analysis_monthly_cost_refactoring(
                         monthly_cost_info["domain_id"]
                     ]
             else:
-                # if not exists both project_id, project_group_id
-                # check EA. if EA, then default workspace_id
                 if is_EA:
-                    workspace_id = list(project_map[domain_id_param].values())[0]
+                    workspace_id = list(project_map[domain_id].values())[0]
             set_params = {
                 "$set": {"workspace_id": workspace_id},
                 "$unset": {"project_group_id": 1},
@@ -247,7 +219,6 @@ def cost_analysis_monthly_cost_refactoring(
 
 @print_log
 def drop_collections(mongo_client):
-    # drop role after refactoring role_binding
     collections = ["job", "job_task", "cost_query_history"]
     for collection in collections:
         mongo_client.drop_collection("COST-ANALYSIS", collection)
@@ -273,26 +244,21 @@ def _create_cost_query_set(mongo_client, cost_query_set_info, workspace_id):
     )
 
 
-def main(mongo_client, domain_id_param, workspace_map, project_map, workspace_mode):
-    # data_source, data_source_rule
+def main(mongo_client, domain_id, workspace_map, project_map, workspace_mode):
     cost_analysis_data_source_and_data_source_rule_refactoring(
-        mongo_client, domain_id_param, project_map
+        mongo_client, domain_id, project_map
     )
 
-    # budget, budget_usage
     cost_analysis_budget_and_budget_usage_refactoring(
-        mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )
 
-    # cost_query_set
-    cost_analysis_cost_query_set_refactoring(mongo_client, domain_id_param, project_map)
+    cost_analysis_cost_query_set_refactoring(mongo_client, domain_id, project_map)
 
-    # cost
     cost_analysis_cost_refactoring(
-        mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )
 
-    # monthly_cost
     cost_analysis_monthly_cost_refactoring(
-        mongo_client, domain_id_param, workspace_map, project_map, workspace_mode
+        mongo_client, domain_id, workspace_map, project_map, workspace_mode
     )

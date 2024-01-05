@@ -78,7 +78,6 @@ def inventory_cloud_service_refactoring(
     )
 
     for inventory_cloud_service_info in inventory_cloud_services_info:
-        # For idempotent
         if inventory_cloud_service_info.get("workspace_id"):
             continue
 
@@ -104,7 +103,6 @@ def inventory_note_refactoring(mongo_client: MongoCustomClient, domain_id, proje
     )
 
     for inventory_note_info in inventory_notes_info:
-        # For idempotent
         if inventory_note_info.get("workspace_id"):
             continue
 

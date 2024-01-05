@@ -14,7 +14,6 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 def notification_project_channel_refactoring(
     mongo_client: MongoCustomClient, domain_id_param, project_map
 ):
-    workspace_id = ""
     operations = []
 
     project_channel_infos = mongo_client.find(
@@ -22,7 +21,6 @@ def notification_project_channel_refactoring(
     )
 
     for project_channel_info in project_channel_infos:
-        # For idempotent
         if project_channel_info.get("workspace_id"):
             continue
 
@@ -51,7 +49,6 @@ def notification_user_channel_migration(
     )
     for user_channel_info in user_channel_infos:
         if user_channel_info.get("secret_id"):
-            # create user_secret using secret data. remove old secret
             secret_info = mongo_client.find_one(
                 "SECRET",
                 "secret",
@@ -70,13 +67,10 @@ def notification_user_channel_migration(
                 "domain_id": secret_info["domain_id"],
                 "created_at": datetime.utcnow(),
             }
-            # create user_secret
             mongo_client.insert_one(
                 "SECRET", "user_secret", create_user_secret_param, is_new=True
             )
-            # delete old secret
             mongo_client.delete_many("SECRET", "secret", {"_id": secret_info["_id"]})
-            # rename
             mongo_client.update_one(
                 "NOTIFICATION",
                 "user_channel",

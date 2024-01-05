@@ -50,9 +50,6 @@ def drop_collections(mongo_client: MongoCustomClient):
 def monitoring_escalation_policy_refactoring(
     mongo_client, domain_id_param, project_map, workspace_mode
 ):
-    resource_group = ""
-    workspace_id = ""
-    project_id = ""
     delete_escalation_policy_ids = []
 
     escalation_policy_infos = mongo_client.find(
@@ -60,7 +57,6 @@ def monitoring_escalation_policy_refactoring(
     )
 
     for escalation_policy_info in escalation_policy_infos:
-        # For idempotent
         if escalation_policy_info.get("workspace_id"):
             continue
 
@@ -75,7 +71,6 @@ def monitoring_escalation_policy_refactoring(
             workspace_id = list(
                 project_map[escalation_policy_info["domain_id"]].values()
             )[0]
-            # update
             set_params = {
                 "$set": {
                     "resource_group": resource_group,
@@ -98,7 +93,6 @@ def monitoring_escalation_policy_refactoring(
                 {},
             )
             for workspace_info in workspace_infos:
-                # create all workspace eecalation_policys in domain
                 create_escalation_policy_param = {
                     "name": escalation_policy_info["name"],
                     "is_default": escalation_policy_info["is_default"],
@@ -126,7 +120,6 @@ def monitoring_escalation_policy_refactoring(
                     is_new=True,
                 )
 
-                # get new _id value
                 new_workspace_info = mongo_client.find_one(
                     "MONITORING",
                     "escalation_policy",
@@ -142,7 +135,6 @@ def monitoring_escalation_policy_refactoring(
                         ],
                     }
                 }
-                # update project_alert_config
                 mongo_client.update_many(
                     "MONITORING",
                     "project_alert_config",
@@ -155,7 +147,6 @@ def monitoring_escalation_policy_refactoring(
                     },
                     update_project_alert_config_params,
                 )
-                # update alert
                 update_alert_params = {
                     "$set": {
                         "escalation_policy_id": new_workspace_info[
@@ -176,10 +167,8 @@ def monitoring_escalation_policy_refactoring(
                     update_alert_params,
                 )
 
-            # delete old policy
             delete_escalation_policy_ids.append(escalation_policy_info["_id"])
 
-    # delete old escalation_policys
     mongo_client.delete_many(
         "MONITORING",
         "escalation_policy",
@@ -201,7 +190,6 @@ def monitoring_project_alert_config_update_fields(
     )
 
     for project_alert_config_info in project_alert_config_infos:
-        # For idempotent
         if project_alert_config_info.get("workspace_id"):
             continue
 
@@ -232,7 +220,6 @@ def monitoring_event_rule_update_fields(
     )
 
     for event_rule_info in event_rule_infos:
-        # For idempotent
         if event_rule_info.get("workspace_id"):
             continue
 
@@ -263,7 +250,6 @@ def monitoring_webhook_update_fields(
     )
 
     for webhook_info in webhook_infos:
-        # For idempotent
         if webhook_info.get("workspace_id"):
             continue
 
@@ -294,7 +280,6 @@ def monitoring_alert_update_fields(
     )
 
     for alert_info in alert_infos:
-        # For idempotent
         if alert_info.get("workspace_id"):
             continue
 
@@ -325,7 +310,6 @@ def monitoring_event_update_fields(
     )
 
     for event_info in event_infos:
-        # For idempotent
         if event_info.get("workspace_id"):
             continue
 
@@ -356,7 +340,6 @@ def monitoring_note_update_fields(
     )
 
     for note_info in note_infos:
-        # For idempotent
         if note_info.get("workspace_id"):
             continue
 

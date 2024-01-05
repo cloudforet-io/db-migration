@@ -12,16 +12,16 @@ def repository_plugin_update_drop_fields(mongo_client: MongoCustomClient):
     plugin_infos = mongo_client.find("REPOSITORY", "plugin", {}, {})
     for plugin_info in plugin_infos:
         if "repository_id" in plugin_info.keys():
-            repository_item = mongo_client.find(
+            repositories_info = mongo_client.find(
                 "REPOSITORY",
                 "repository",
                 {
                     "repository_id": plugin_info["repository_id"],
                     "repository_type": "local",
                 },
-                {},
+                {"_id": 1},
             )
-            if repository_item:
+            if len([repository_info for repository_info in repositories_info]) > 0:
                 mongo_client.update_one(
                     "REPOSITORY",
                     "plugin",
@@ -38,8 +38,7 @@ def repository_plugin_update_drop_fields(mongo_client: MongoCustomClient):
 
 @print_log
 def drop_collections(mongo_client):
-    # drop role after refactoring role_binding
-    collections = ["policy", "repository", "schema"]
+    collections = ["repository", "policy", "schema"]
     for collection in collections:
         mongo_client.drop_collection("REPOSITORY", collection)
 

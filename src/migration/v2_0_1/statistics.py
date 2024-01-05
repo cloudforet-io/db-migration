@@ -8,7 +8,6 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def drop_collections(mongo_client):
-    # drop role after refactoring role_binding
     collections = ["history", "schedule"]
     for collection in collections:
         mongo_client.drop_collection("STATISTICS", collection)
