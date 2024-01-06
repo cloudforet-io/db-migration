@@ -40,6 +40,14 @@ def secret_secret_migration(
                 },
                 {"workspace_id": 1, "project_id": 1},
             )
+
+            if not service_account_info:
+                mongo_client.update_one(
+                    "SECRET", "secret",
+                    {"_id": secret_info.get("_id")}, {"$set": {"tags.homeless": True}}
+                )
+                continue
+
             workspace_id = service_account_info.get("workspace_id")
             project_id = service_account_info.get("project_id")
 

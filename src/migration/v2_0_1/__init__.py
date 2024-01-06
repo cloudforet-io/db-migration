@@ -80,7 +80,6 @@ def main(file_path):
 
         inventory.main(mongo_client, domain_id, project_map)
 
-        """cost analysis"""
         cost_analysis.main(
             mongo_client, domain_id, workspace_map, project_map, workspace_mode
         )

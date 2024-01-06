@@ -59,6 +59,11 @@ def monitoring_escalation_policy_refactoring(
     for escalation_policy_info in escalation_policy_infos:
         if escalation_policy_info.get("workspace_id"):
             continue
+        if not project_map[domain_id_param]:
+            _LOGGER.error(
+                f"Domain({domain_id_param}) has no project map data (domain_id: {domain_id_param})"
+            )
+            continue
 
         if escalation_policy_info.get("scope") == "DOMAIN":
             resource_group = "WORKSPACE"

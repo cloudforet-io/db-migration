@@ -286,7 +286,7 @@ def _get_root_project_group_id_by_project_group_id(
 def identity_service_account_and_trusted_account_creating(
     mongo_client, domain_id_param
 ):
-    domain_id = ""
+    domain_id = domain_id_param
     service_account_infos = mongo_client.find(
         "IDENTITY",
         "service_account",
@@ -368,7 +368,7 @@ def identity_service_account_and_trusted_account_creating(
         else:
             if service_account_info.get("project"):
                 project_info = service_account_info.get("project")
-                project_id = project_info("project_id")
+                project_id = project_info.get("project_id")
                 workspace_id = PROJECT_MAP[domain_id].get(project_id)
             else:
                 workspace_id = list(PROJECT_MAP[domain_id].values())[0]
@@ -447,12 +447,11 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
                     "project_group",
                     {
                         "project_group_id": role_binding_info.get("project_group_id"),
-                        "parent_group_id": {"$eq": None},
                     },
                     {},
                 )
                 workspace_id = project_group_info.get("workspace_id")
-                if project_group_info:
+                if not project_group_info.get("parent_group_id"):
                     role_id = "managed-workspace-owner"
                     role_type = "WORKSPACE_OWNER"
                 else:
