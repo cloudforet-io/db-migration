@@ -517,13 +517,6 @@ def identity_user_refactoring(mongo_client, domain_id_param):
         )
 
 
-@print_log
-def provider_delete_documents(mongo_client):
-    mongo_client.delete_many(
-        "IDENTITY", "provider", {"provider": {"$in": ["aws", "google_cloud", "azure"]}}
-    )
-
-
 def _get_schema_to_schema_id(schema):
     schema_id = None
     if schema == "azure_subscription_id":
@@ -569,7 +562,7 @@ def identity_role_refactoring(mongo_client, domain_id_param):
 
 
 def drop_collections(mongo_client):
-    collections = ["domain_owner", "policy", "a_p_i_key"]
+    collections = ["provider", "domain_owner", "policy", "a_p_i_key"]
     for collection in collections:
         mongo_client.drop_collection("IDENTITY", collection)
 

@@ -55,7 +55,6 @@ def main(file_path):
     inventory.cloud_service_report_update_fields(mongo_client)
     inventory.collector_update_fields(mongo_client)
     inventory.collector_rule_update_fields(mongo_client)
-    identity.provider_delete_documents(mongo_client)
 
     board.drop_collections(mongo_client)
     repository.drop_collections(mongo_client)
