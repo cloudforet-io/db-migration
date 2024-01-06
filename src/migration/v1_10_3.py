@@ -1,6 +1,5 @@
 import logging
 from conf import DEFAULT_LOGGER
-from pymongo import UpdateOne, DeleteOne
 from lib import MongoCustomClient
 from lib.util import print_log
 
