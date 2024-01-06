@@ -59,7 +59,7 @@ def secret_secret_migration(
             set_param = {
                 "$set": {
                     "secret_schema_id": schema_id,
-                    "secret_secret_id": secret_info["secret_id"],
+                    "secret_id": secret_info["secret_id"],
                 }
             }
             mongo_client.update_many(
