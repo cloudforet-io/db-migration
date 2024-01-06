@@ -93,9 +93,11 @@ def identity_project_group_refactoring_and_workspace_creating(
             parent_project_group_id = project_group.get("parent_project_group_id")
             project_group_name = project_group["name"]
 
-            unset_params = {"$unset": {"parent_project_group": 1, "created_by": 1}}
+            unset_params = {"$unset": 
+                            {"parent_project_group": 1, "created_by": 1, "parent_project_group_id": 1}
+            }
 
-            set_params = {"$set": {}}
+            set_params = {"$set": {"parent_group_id": parent_project_group_id}}
 
             if domain_id in WORKSPACE_MAP["multi"].keys():
                 if not parent_project_group_id:
