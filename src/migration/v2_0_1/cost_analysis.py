@@ -104,7 +104,6 @@ def cost_analysis_cost_refactoring(
     mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
-    item_count = 0
     is_EA = False
 
     domain_tags = mongo_client.find_one(
@@ -152,8 +151,6 @@ def cost_analysis_cost_refactoring(
 
             operations.append(UpdateOne({"_id": cost_info["_id"]}, set_params))
 
-            item_count += 1
-
         mongo_client.bulk_write("COST_ANALYSIS", "cost", operations)
 
 
@@ -162,7 +159,6 @@ def cost_analysis_monthly_cost_refactoring(
     mongo_client, domain_id, workspace_map, project_map, workspace_mode
 ):
     workspace_id = None
-    item_count = 0
     is_EA = False
 
     domain_tags = mongo_client.find_one(
@@ -212,8 +208,6 @@ def cost_analysis_monthly_cost_refactoring(
             }
 
             operations.append(UpdateOne({"_id": monthly_cost_info["_id"]}, set_params))
-
-            item_count += 1
 
         mongo_client.bulk_write("COST_ANALYSIS", "monthly_cost", operations)
 
