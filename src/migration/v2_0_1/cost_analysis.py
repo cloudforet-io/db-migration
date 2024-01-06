@@ -147,7 +147,7 @@ def cost_analysis_cost_refactoring(
                     workspace_id = list(project_map[domain_id].values())[0]
             set_params = {
                 "$set": {"workspace_id": workspace_id},
-                "$unset": {"project_group_id": 1},
+                "$unset": {"project_group_id": 1, "plugin_info.schema": 1},
             }
 
             operations.append(UpdateOne({"_id": cost_info["_id"]}, set_params))

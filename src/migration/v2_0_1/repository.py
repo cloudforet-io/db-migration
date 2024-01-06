@@ -37,6 +37,16 @@ def repository_plugin_update_drop_fields(mongo_client: MongoCustomClient):
 
 
 @print_log
+def repository_plugin_delete_field(mongo_client: MongoCustomClient):
+    mongo_client.update_many(
+        "REPOSITORY",
+        "plugin",
+        {},
+        {"$unset": {"repository_id": 1}},
+    )
+
+
+@print_log
 def drop_collections(mongo_client):
     collections = ["repository", "policy", "schema"]
     for collection in collections:
