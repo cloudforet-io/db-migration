@@ -47,7 +47,7 @@ def identity_domain_refactoring_and_external_auth_creating(
         plugin_info = domain.get("plugin_info", {})
         if plugin_info and plugin_info.get("metadata"):
             if options := plugin_info.get("options"):
-                auth_type = plugin_info["metadata"].get("auth_type")
+                auth_type = options.get("auth_type")
                 identity_provider, protocol = auth_type.split("_")
                 plugin_info["metadata"].update(options)
                 if validator := options.get("domain"):
@@ -93,8 +93,12 @@ def identity_project_group_refactoring_and_workspace_creating(
             parent_project_group_id = project_group.get("parent_project_group_id")
             project_group_name = project_group["name"]
 
-            unset_params = {"$unset": 
-                            {"parent_project_group": 1, "created_by": 1, "parent_project_group_id": 1}
+            unset_params = {
+                "$unset": {
+                    "parent_project_group": 1,
+                    "created_by": 1,
+                    "parent_project_group_id": 1,
+                }
             }
 
             set_params = {"$set": {"parent_group_id": parent_project_group_id}}
@@ -331,7 +335,7 @@ def identity_service_account_and_trusted_account_creating(
             {"trusted_service_account_id": service_account_info["service_account_id"]},
             {
                 "$set": {"trusted_account_id": trusted_account_id},
-                "unset": {"trusted_service_account_id": 1}
+                "$unset": {"trusted_service_account_id": 1},
             },
         )
 
