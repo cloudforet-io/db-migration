@@ -555,8 +555,6 @@ def _get_schema_to_schema_id(schema):
 
 @print_log
 def identity_role_refactoring(mongo_client, domain_id_param):
-    mongo_client.drop_collection("IDENTITY", "role")
-
     role_ids = [
         "managed-domain-admin",
         "managed-workspace-member",
