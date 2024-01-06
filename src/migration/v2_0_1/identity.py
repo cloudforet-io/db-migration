@@ -367,7 +367,13 @@ def identity_service_account_and_trusted_account_creating(
             workspace_id = PROJECT_MAP[domain_id].get(project_id)
         else:
             if service_account_info.get("project"):
-                project_info = service_account_info.get("project")
+                project_object_id = service_account_info.get("project")
+                project_info = mongo_client.find_one(
+                    "IDENTITY", "project",
+                    {"_id": project_object_id}
+                    , {}
+                )
+
                 project_id = project_info.get("project_id")
                 workspace_id = PROJECT_MAP[domain_id].get(project_id)
             else:
