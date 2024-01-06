@@ -73,10 +73,6 @@ def inventory_cloud_service_refactoring(
 ):
     operations = []
 
-    inventory_cloud_services_info = mongo_client.find(
-        "INVENTORY", "cloud_service", {"domain_id": domain_id}, {}
-    )
-
     for inventory_cloud_services_info in mongo_client.find_by_pagination(
         "INVENTORY",
         "cloud_service",
