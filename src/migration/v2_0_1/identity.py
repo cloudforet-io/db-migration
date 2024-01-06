@@ -192,9 +192,12 @@ def identity_project_refactoring(mongo_client: MongoCustomClient, domain_id_para
                 workspace_id = WORKSPACE_MAP["single"][domain_id]
 
             if not workspace_id:
-                _LOGGER.error(
-                    f"Project({project_id}) has no workspace_id. (project: {project})"
+                project_group_info = mongo_client.find_one(
+                    "IDENTITY", "project_group",
+                    {"project_group_id": project_group_id},
+                    {}
                 )
+                workspace_id = project_group_info["workspace_id"]
 
             if domain_id not in PROJECT_MAP.keys():
                 PROJECT_MAP[domain_id] = {project_id: workspace_id}
@@ -284,7 +287,7 @@ def _get_root_project_group_id_by_project_group_id(
 
 @print_log
 def identity_service_account_and_trusted_account_creating(
-    mongo_client, domain_id_param
+    mongo_client, domain_id_param, workspace_mode
 ):
     domain_id = domain_id_param
     service_account_infos = mongo_client.find(
@@ -377,7 +380,11 @@ def identity_service_account_and_trusted_account_creating(
                 project_id = project_info.get("project_id")
                 workspace_id = PROJECT_MAP[domain_id].get(project_id)
             else:
-                workspace_id = list(PROJECT_MAP[domain_id].values())[0]
+                if workspace_mode:
+                    workspace_id = list(WORKSPACE_MAP["multi"][domain_id].values())[0]
+                else:
+                    workspace_id = list(PROJECT_MAP[domain_id].values())[0]
+
                 project_id = _create_unmanaged_sa_project(
                     domain_id, workspace_id, mongo_client
                 )
@@ -646,7 +653,7 @@ def main(mongo_client, domain_id, workspace_mode):
     identity_domain_refactoring_and_external_auth_creating(mongo_client, domain_id)
     identity_project_group_refactoring_and_workspace_creating(mongo_client, domain_id)
     identity_project_refactoring(mongo_client, domain_id)
-    identity_service_account_and_trusted_account_creating(mongo_client, domain_id)
+    identity_service_account_and_trusted_account_creating(mongo_client, domain_id, workspace_mode)
     identity_role_binding_refactoring(mongo_client, domain_id)
     identity_role_refactoring(mongo_client, domain_id)
     identity_user_refactoring(mongo_client, domain_id)
