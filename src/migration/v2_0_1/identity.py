@@ -438,10 +438,10 @@ def identity_role_binding_refactoring(mongo_client, domain_id_param):
         param_role_id = role_binding_info["role_id"]
 
         role_info = mongo_client.find_one(
-            "IDENTITY", "role", {"role_id": param_role_id}, {}
+            "IDENTITY", "role", {"role_id": param_role_id, "domain_id": domain_id_param}, {}
         )
-
-        if role_info and role_info.get("role_type", "") == "DOMAIN":
+        
+        if role_info.get("role_type") == "DOMAIN":
             role_id = "managed-domain-admin"
             role_type = "DOMAIN_ADMIN"
             workspace_id = "*"
@@ -555,6 +555,10 @@ def _get_schema_to_schema_id(schema):
 
 @print_log
 def identity_role_refactoring(mongo_client, domain_id_param):
+    mongo_client.delete_many(
+        "IDENTITY", "role", {"domain_id":domain_id_param}
+    )
+
     role_ids = [
         "managed-domain-admin",
         "managed-workspace-member",
@@ -653,7 +657,7 @@ def main(mongo_client, domain_id, workspace_mode):
     identity_project_refactoring(mongo_client, domain_id)
     identity_service_account_and_trusted_account_creating(mongo_client, domain_id, workspace_mode)
     identity_role_binding_refactoring(mongo_client, domain_id)
-    identity_role_refactoring(mongo_client, domain_id)
     identity_user_refactoring(mongo_client, domain_id)
+    identity_role_refactoring(mongo_client, domain_id)
 
     return WORKSPACE_MAP, PROJECT_MAP

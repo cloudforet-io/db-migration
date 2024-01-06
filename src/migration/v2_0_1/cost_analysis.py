@@ -213,6 +213,14 @@ def cost_analysis_monthly_cost_refactoring(
 
 
 @print_log
+def cost_analysis_data_source_plugin_info_migration(mongo_client):
+    mongo_client.update_many("COST_ANALYSIS", "data_source"
+            , {}
+            , {"$rename": {"plugin_info.schema": "plugin_info.schema_id"}}
+    )
+
+
+@print_log
 def drop_collections(mongo_client):
     collections = ["job", "job_task", "cost_query_history"]
     for collection in collections:
@@ -258,4 +266,7 @@ def main(mongo_client, domain_id, workspace_map, project_map, workspace_mode):
     )
     cost_analysis_monthly_cost_refactoring(
         mongo_client, domain_id, workspace_map, project_map, workspace_mode
+    )
+    cost_analysis_data_source_plugin_info_migration(
+        mongo_client
     )
