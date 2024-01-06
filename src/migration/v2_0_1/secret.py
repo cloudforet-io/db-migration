@@ -47,6 +47,18 @@ def secret_secret_migration(
                 _LOGGER.error(
                     f"Secret service_account({secret_info['service_account_id']}) does not exists in IDENTITY.sa"
                 )
+            
+            set_param = {
+                "$set": {
+                    "secret_schema_id": schema_id,
+                    "secret_id": secret_info["secret_id"],
+                }
+            }
+            mongo_client.update_many(
+                "IDENTITY", "service_account",
+                {"service_account_id": secret_info.get("service_account_id")},
+                set_param,
+            )
 
         set_params = {
             "$set": {
@@ -92,6 +104,19 @@ def secret_trusted_secret_migration(mongo_client: MongoCustomClient, domain_id_p
         mongo_client.update_one(
             "SECRET", "trusted_secret", {"_id": trusted_secret_info["_id"]}, set_params
         )
+
+        if trusted_secret_info.get("trusted_account_id"):
+            set_param = {
+                "$set": {
+                    "secret_schema_id": schema_id,
+                    "trusted_secret_id": trusted_secret_info["trusted_secret_id"],
+                }
+            }
+            mongo_client.update_many(
+                "IDENTITY", "trusted_account",
+                {"trusted_account_id": trusted_secret_info.get("trusted_secret_id")},
+                set_param,
+            )
 
 
 def _get_schema_to_schema_id(schema):
