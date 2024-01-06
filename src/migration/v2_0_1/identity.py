@@ -329,7 +329,10 @@ def identity_service_account_and_trusted_account_creating(
             "IDENTITY",
             "service_account",
             {"trusted_service_account_id": service_account_info["service_account_id"]},
-            {"$set": {"trusted_service_account_id": trusted_account_id}},
+            {
+                "$set": {"trusted_account_id": trusted_account_id},
+                "unset": {"trusted_service_account_id": 1}
+            },
         )
 
         mongo_client.delete_many(
