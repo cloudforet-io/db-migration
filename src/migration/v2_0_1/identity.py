@@ -52,10 +52,9 @@ def identity_domain_refactoring_and_external_auth_creating(
                 plugin_info["metadata"].update(options)
                 if validator := options.get("domain"):
                     plugin_info.update({"validator": validator})
-                plugin_info["metadata"].update({
-                    "identity_provider":identity_provider,
-                    "protocol": protocol
-                })
+                plugin_info["metadata"].update(
+                    {"identity_provider": identity_provider, "protocol": protocol}
+                )
         tags = domain.get("tags")
 
         if workspace_mode := tags.get("workspace_mode"):
@@ -518,8 +517,9 @@ def identity_user_refactoring(mongo_client, domain_id_param):
 
 @print_log
 def provider_delete_documents(mongo_client):
-    mongo_client.delete_many("IDENTITY", "provider"
-                    , {"provider":{"$in":["aws","google_cloud","azure"]}})
+    mongo_client.delete_many(
+        "IDENTITY", "provider", {"provider": {"$in": ["aws", "google_cloud", "azure"]}}
+    )
 
 
 def _get_schema_to_schema_id(schema):
@@ -543,13 +543,17 @@ def _get_schema_to_schema_id(schema):
 def identity_role_refactoring(mongo_client, domain_id_param):
     mongo_client.drop_collection("IDENTITY", "role")
 
-    role_ids = ["managed-domain-admin", "managed-workspace-member", "managed-workspace-owner"]
+    role_ids = [
+        "managed-domain-admin",
+        "managed-workspace-member",
+        "managed-workspace-owner",
+    ]
     names = ["Domain Admin", "Workspace Member", "Workspace Owner"]
     role_types = ["DOMAIN_ADMIN", "WORKSPACE_MEMBER", "WORKSPACE_OWNER"]
 
     for role_id, name, role_type in zip(role_ids, names, role_types):
         create_role_param = {
-            "role_id": role_id, 
+            "role_id": role_id,
             "name": name,
             "version": "1.0",
             "role_type": role_type,
@@ -559,8 +563,7 @@ def identity_role_refactoring(mongo_client, domain_id_param):
             "updated_at": datetime.utcnow(),
         }
 
-        mongo_client.insert_one('IDENTITY', 'role', 
-                    create_role_param, is_new=True)
+        mongo_client.insert_one("IDENTITY", "role", create_role_param, is_new=True)
 
 
 def drop_collections(mongo_client):
