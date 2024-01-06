@@ -2,7 +2,6 @@ import logging
 import yaml
 import re
 import functools
-import time
 import click
 import shutil
 
@@ -58,7 +57,7 @@ def print_finish_stage(action=None, name=None, total_time=None):
         else:
             title = f" [{action}] {name} "[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, "=")
     else:
-        title = f""[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, "=")
+        title = ""[:TERMINAL_WIDTH].center(TERMINAL_WIDTH, "=")
 
     if action == "ERROR":
         click.echo(click.style(title, fg="bright_red", bold=True))

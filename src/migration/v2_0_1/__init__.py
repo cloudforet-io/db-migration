@@ -46,8 +46,6 @@ def main(file_path):
         identity.update_domain(mongo_client, domain_id, domain_info["tags"])
 
     board.main(mongo_client)
-    repository.main(mongo_client)
-    repository.repository_plugin_delete_field(mongo_client)
     file_manager.file_update_fields(mongo_client)
     file_manager.file_delete_documents(mongo_client)
     monitoring.event_rule_update_fields(mongo_client)

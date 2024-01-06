@@ -1,5 +1,4 @@
 import logging
-import hashlib
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
