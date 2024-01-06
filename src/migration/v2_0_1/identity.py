@@ -47,7 +47,14 @@ def identity_domain_refactoring_and_external_auth_creating(
         plugin_info = domain.get("plugin_info", {})
         if plugin_info and plugin_info.get("metadata"):
             if options := plugin_info.get("options"):
+                auth_type = plugin_info["metadata"].get("auth_type")
+                identity_provider, protocol = auth_type.split("_")
                 plugin_info["metadata"].update(options)
+                if validator := options.get("domain"):
+                    plugin_info.update({"validator": validator})
+                plugin_info["metadata"].update(
+                    {"identity_provider": identity_provider, "protocol": protocol}
+                )
         tags = domain.get("tags")
 
         if workspace_mode := tags.get("workspace_mode"):
@@ -508,6 +515,13 @@ def identity_user_refactoring(mongo_client, domain_id_param):
         )
 
 
+@print_log
+def provider_delete_documents(mongo_client):
+    mongo_client.delete_many(
+        "IDENTITY", "provider", {"provider": {"$in": ["aws", "google_cloud", "azure"]}}
+    )
+
+
 def _get_schema_to_schema_id(schema):
     schema_id = None
     if schema == "azure_subscription_id":
@@ -525,8 +539,35 @@ def _get_schema_to_schema_id(schema):
     return schema_id
 
 
+@print_log
+def identity_role_refactoring(mongo_client, domain_id_param):
+    mongo_client.drop_collection("IDENTITY", "role")
+
+    role_ids = [
+        "managed-domain-admin",
+        "managed-workspace-member",
+        "managed-workspace-owner",
+    ]
+    names = ["Domain Admin", "Workspace Member", "Workspace Owner"]
+    role_types = ["DOMAIN_ADMIN", "WORKSPACE_MEMBER", "WORKSPACE_OWNER"]
+
+    for role_id, name, role_type in zip(role_ids, names, role_types):
+        create_role_param = {
+            "role_id": role_id,
+            "name": name,
+            "version": "1.0",
+            "role_type": role_type,
+            "is_managed": True,
+            "domain_id": domain_id_param,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+        }
+
+        mongo_client.insert_one("IDENTITY", "role", create_role_param, is_new=True)
+
+
 def drop_collections(mongo_client):
-    collections = ["role", "domain_owner", "policy", "a_p_i_key"]
+    collections = ["domain_owner", "policy", "a_p_i_key"]
     for collection in collections:
         mongo_client.drop_collection("IDENTITY", collection)
 
@@ -600,6 +641,7 @@ def main(mongo_client, domain_id, workspace_mode):
     identity_project_refactoring(mongo_client, domain_id)
     identity_service_account_and_trusted_account_creating(mongo_client, domain_id)
     identity_role_binding_refactoring(mongo_client, domain_id)
+    identity_role_refactoring(mongo_client, domain_id)
     identity_user_refactoring(mongo_client, domain_id)
 
     return WORKSPACE_MAP, PROJECT_MAP

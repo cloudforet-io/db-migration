@@ -9,7 +9,9 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 @print_log
 def drop_collections(mongo_client: MongoCustomClient):
-    mongo_client.drop_collection("BOARD", "board")
+    collections = ["board", "post"]
+    for collection in collections:
+        mongo_client.drop_collection("BOARD", collection)
 
 
 @print_log

@@ -47,6 +47,7 @@ def main(file_path):
 
     board.main(mongo_client)
     repository.main(mongo_client)
+    repository.repository_plugin_delete_field(mongo_client)
     file_manager.file_update_fields(mongo_client)
     file_manager.file_delete_documents(mongo_client)
     monitoring.event_rule_update_fields(mongo_client)
@@ -54,6 +55,7 @@ def main(file_path):
     inventory.cloud_service_report_update_fields(mongo_client)
     inventory.collector_update_fields(mongo_client)
     inventory.collector_rule_update_fields(mongo_client)
+    identity.provider_delete_documents(mongo_client)
 
     board.drop_collections(mongo_client)
     repository.drop_collections(mongo_client)
