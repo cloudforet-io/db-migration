@@ -64,8 +64,7 @@ def file_manager_change_download_url(mongo_client: MongoCustomClient):
     files = []
     
     delete_user_files=[]
-    
-    
+
     for file_info in file_infos:
         resource_group = file.get("resource_group")
         domain_id = file.get("domain_id")
@@ -79,12 +78,6 @@ def file_manager_change_download_url(mongo_client: MongoCustomClient):
             if "user_id" in file_info:
                 download_url = "/files/domain/" + domain_id + "/user/"+ user_id + "/" +  file_id
                 file_info["download_url"] = download_url
-                # `state`와 `project_id` 키 삭제
-                if "state" in file_info:
-                    del file_info["state"]
-                if "project_id" in file_info:
-                    del file_info["project_id"]
-                
                 user_files.append(file_info)
                 delete_user_files.append(file_id)
                 continue
