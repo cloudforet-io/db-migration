@@ -132,5 +132,5 @@ def main(file_path):
     dashboard_public_dashboard_delete_data_table(mongo_client)
     
     # File Manager Service
-    file_manager_state_remove_state_project_id(mongo_client)
-    file_manager_change_download_url(mongo_client)
+    #file_manager_state_remove_state_project_id(mongo_client)
+    #file_manager_change_download_url(mongo_client)
