@@ -15,6 +15,7 @@ DB_NAME_MAP = {
     "PLUGIN": "plugin",
     "CONFIG": "config",
     "INVENTORY": "inventory",
+    "COST_ANALYSIS": "cost_analysis",
 }
 
 CONNECTION_URI = "localhost:27017"
