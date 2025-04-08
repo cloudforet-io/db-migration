@@ -93,4 +93,8 @@ def main(file_path):
     dashboard_public_dashboard_delete_data_table(mongo_client)
     
     # File Manager Service
-    #file_manager_state_remove_state_project_id(mongo_client)
+    file_manager_record_delete_state_download_url_file_type_(mongo_client)
+    board_add_contents_type(mongo_client)
+    board_change_contents(mongo_client)
+    mongo_client.close()
+    
