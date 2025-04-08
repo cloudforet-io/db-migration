@@ -1,4 +1,5 @@
 import logging
+import html
 
 from conf import DEFAULT_LOGGER
 from lib import MongoCustomClient
@@ -53,67 +54,27 @@ def dashboard_public_dashboard_delete_data_table(mongo_client: MongoCustomClient
 
 
 @print_log
-def file_manager_state_remove_state_project_id(mongo_client: MongoCustomClient):
-    items = mongo_client.update_many("FILE-MANAGER", "file", {}, {"$unset":{"state":"", "project_id":""}})
+def file_manager_record_delete_state_download_url_file_type_(mongo_client: MongoCustomClient):
+    items = mongo_client.update_many("FILE-MANAGER", "file", {}, {"$unset":{"state":"","file_type":"","download_url":""}})
+    _LOGGER.info(f"Total file-manager delete Count : {items}")
+
 
 @print_log
-def file_manager_change_download_url(mongo_client: MongoCustomClient):
-    file_infos = mongo_client.find("FILE-MANAGER","file",{},{})
+def board_add_contents_type(mongo_client: MongoCustomClient):
+    mongo_client.update_many("BOARD", "board", {}, {"$set": {"contents_type": "html"}})
     
-    user_files = []
-    files = []
-    
-    delete_user_files=[]
+@print_log
+def board_change_contents(mongo_client: MongoCustomClient):
+    board_contents_list = mongo_client.find("BOARD","board",{},{})
 
-    for file_info in file_infos:
-        resource_group = file.get("resource_group")
-        domain_id = file.get("domain_id")
-        workspace_id = file.get("workspace_id")
-        user_id = file.get("user_id")
-        file_id = file.get("file_id")
-        
-        if resource_group == "SYSTEM":
-            download_url = "/files/public/" + file_id
-        elif resource_group == "DOMAIN":
-            if "user_id" in file_info:
-                download_url = "/files/domain/" + domain_id + "/user/"+ user_id + "/" +  file_id
-                file_info["download_url"] = download_url
-                user_files.append(file_info)
-                delete_user_files.append(file_id)
-                continue
-            else:
-                download_url = "/files/domain/" + domain_id + "/" + file_id
-        elif resource_group == "WORKSPACE":
-            download_url = "/files/domain/" + domain_id + "/workspace/" + workspace_id + "/" + file_id
-        elif resource_group == "PROJECT":
-            download_url = "/files/domain/" + domain_id + "/workspace/" + workspace_id + "/" + file_id
-        elif resource_group == "USER":
-            download_url = "/files/domain/" + domain_id + "/user/"+ user_id + "/" +  file_id
-            
-        files.append(
-            UpdateOne(
-                {"_id":file_info["file"]},
-                {
-                    "$set": {
-                        "download_url": download_url
-                    }
-                },
-            )
-        )
-        
-    if delete_user_files:  # 삭제할 파일 ID가 있는 경우만 실행
-        mongo_client.delete_many(
-            "FILE-MANAGER",  # 데이터베이스 이름
-            "file",          # 컬렉션 이름
-            {"file_id": {"$in": delete_user_files}}  # 조건: file_id가 리스트 안에 포함된 경우
-        )
-    
-    if user_files:
-        mongo_client.bulk_write("FILE-MANAGER", "user_file", user_files)
-        
-    mongo_client.bulk_write("FILE-MANAGER", "file", files)
+    update_contents = []
 
+    for contents in board_contents_list:
+        contents["contents"] = html.escape(contents["contents"])
+        update_contents.append(contents)
 
+    if update_contents:
+        mongo_client.bulk_write("BOARD", "board", update_contents)
     
     
 
@@ -133,4 +94,3 @@ def main(file_path):
     
     # File Manager Service
     #file_manager_state_remove_state_project_id(mongo_client)
-    #file_manager_change_download_url(mongo_client)
