@@ -16,6 +16,7 @@ DB_NAME_MAP = {
     "CONFIG": "config",
     "INVENTORY": "inventory",
     "FILE-MANAGER": "file-manager",
+    "COST_ANALYSIS": "cost_analysis",
 }
 
 CONNECTION_URI = "localhost:27017"
