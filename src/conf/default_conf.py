@@ -15,6 +15,7 @@ DB_NAME_MAP = {
     "PLUGIN": "plugin",
     "CONFIG": "config",
     "INVENTORY": "inventory",
+    "FILE-MANAGER": "file-manager",
     "COST_ANALYSIS": "cost_analysis",
 }
 
