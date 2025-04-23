@@ -36,15 +36,26 @@ def cost_analysis_budget_modify_data(mongo_client: MongoCustomClient):
             )
         else:
 
-            if not "notifications" in budget_info:
+            if "notifications" in budget_info:
+                as_is_notifications = budget_info.get("notifications", [])
+                to_be_notifications = {
+                    "plans": [],
+                    "recipients": {
+                        "users": [],
+                        "budget_manager_notification": "DISABLED",
+                    },
+                    "state": "DISABLED",
+                }
+            elif "notification" in budget_info:
+                as_is_notifications = budget_info.get("notification", {})
+                to_be_notifications = budget_info.get("notification", {})
+                if not "recipients" in to_be_notifications:
+                    to_be_notifications["recipients"] = {
+                        "users": [],
+                        "budget_manager_notification": "DISABLED",
+                    }
+            else:
                 continue
-
-            as_is_notifications = budget_info.get("notifications", [])
-            to_be_notifications = {
-                "plans": [],
-                "recipients": {"users": [], "budget_manager_notification": "DISABLED"},
-                "state": "DISABLED",
-            }
 
             budget_start = budget_info.get("start")
             budget_end = budget_info.get("end")
@@ -60,14 +71,26 @@ def cost_analysis_budget_modify_data(mongo_client: MongoCustomClient):
 
             if isinstance(as_is_notifications, list):
                 for as_is_notification in as_is_notifications:
-
-                    if as_is_notification.get("notified_months"):
+                    if "notified_months" in as_is_notification:
                         del as_is_notification["notified_months"]
-                    if as_is_notification.get("as_is_notification"):
+                    if "as_is_notification" in as_is_notification:
                         del as_is_notification["notification_type"]
 
                     as_is_notification["notified"] = True
                     to_be_notifications["plans"].append(as_is_notification)
+            elif isinstance(as_is_notifications, dict):
+                plans = as_is_notifications.get("plans", [])
+                to_be_plans = []
+                for plan in plans:
+                    print("plan", plan)
+                    if "notified_months" in plan:
+                        del plan["notified_months"]
+                    if "notification_type" in plan:
+                        del plan["notification_type"]
+
+                    plan["notified"] = True
+                    to_be_plans.append(plan)
+                to_be_notifications["plans"] = to_be_plans
 
             budget_usage_cursors = mongo_client.find(
                 "COST_ANALYSIS",
