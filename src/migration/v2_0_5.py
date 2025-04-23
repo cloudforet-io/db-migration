@@ -13,8 +13,8 @@ def identity_service_account_modify_data(mongo_client: MongoCustomClient):
     mongo_client.update_many(
         "IDENTITY",
         "service_account",
-        {"service_account_manager_id": {"$exists": False}},
-        {"$set": {"service_account_manager_id": None}},
+        {"service_account_mgr_id": {"$exists": False}},
+        {"$set": {"service_account_mgr_id": None}},
     )
 
 
