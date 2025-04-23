@@ -10,15 +10,12 @@ _LOGGER = logging.getLogger(DEFAULT_LOGGER)
 
 
 def identity_service_account_modify_data(mongo_client: MongoCustomClient):
-    cursors = mongo_client.find("IDENTITY", "service_account", {})
-    for service_account_info in cursors:
-        if "service_account_manager_id" not in service_account_info:
-            mongo_client.update_one(
-                "IDENTITY",
-                "service_account",
-                {"service_account_id": service_account_info.get("service_account_id")},
-                {"$set": {"service_account_manager_id": None}},
-            )
+    mongo_client.update_many(
+        "IDENTITY",
+        "service_account",
+        {"service_account_manager_id": {"$exists": False}},
+        {"$set": {"service_account_manager_id": None}},
+    )
 
 
 @print_log
