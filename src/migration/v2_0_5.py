@@ -118,20 +118,6 @@ def cost_analysis_budget_modify_data(mongo_client: MongoCustomClient):
                     budget_limit = budget_usage_limit
 
                 total_usage += budget_usage_info.get("cost", 0)
-                mongo_client.update_one(
-                    "COST_ANALYSIS",
-                    "budget_usage",
-                    {"budget_usage_id": budget_usage_info.get("budget_usage_id")},
-                    {
-                        "$set": {
-                            "service_account_id": None,
-                        },
-                        "$unset": {
-                            "data_source_id": "",
-                            "provider_filter": "",
-                        },
-                    },
-                )
 
             if budget_info.get("limit", 0) != 0 and budget_time_unit == "TOTAL":
                 utilization_rate = round(
@@ -159,6 +145,20 @@ def cost_analysis_budget_modify_data(mongo_client: MongoCustomClient):
                 {
                     "$set": set_params,
                     "$unset": unset_params,
+                },
+            )
+            mongo_client.update_many(
+                "COST_ANALYSIS",
+                "budget_usage",
+                {"budget_id": budget_info.get("budget_id")},
+                {
+                    "$set": {
+                        "service_account_id": None,
+                    },
+                    "$unset": {
+                        "data_source_id": "",
+                        "provider_filter": "",
+                    },
                 },
             )
 
