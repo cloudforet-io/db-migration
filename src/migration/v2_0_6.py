@@ -33,12 +33,12 @@ def _alert_manager_add_service_healthy_state(mongo_client: MongoCustomClient):
                 "ALERT_MANAGER",
                 "service",
                 {"service_id": service_id},
-                {"$set": {"healthy_state": is_healthy}},
+                {"$set": {"service_healthy": is_healthy}},
             )
 
 
 def main(file_path):
-    mongo_client: MongoCustomClient = MongoCustomClient(file_path, "v2.0.5")
+    mongo_client: MongoCustomClient = MongoCustomClient(file_path, "v2.0.6")
 
     # Add healthy_state field to service collection
     _alert_manager_add_service_healthy_state(mongo_client)
