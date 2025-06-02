@@ -176,7 +176,8 @@ def main(file_path, 'v1.1.1'):
 
 ### 5-1) Release Note
 
-| Version | Description                                          | Related Images          | Release Date |
-|---------|------------------------------------------------------|-------------------------|--------------|
-| 2.0.6   | Add "service_healthy" field at Alert-Manager.Service | alert-manager:2.0.dev72 | 2025-04-22   |
+| Version | Description                                          | Related Images           | Release Date |
+|---------|------------------------------------------------------|--------------------------|--------------|
+| 2.0.7   | Refactor data structure and fields for new CostReport service features          | cost-analysis:2.0.dev223 | 2025-04-22   |
+| 2.0.6   | Add "service_healthy" field at Alert-Manager.Service | alert-manager:2.0.dev72  | 2025-04-22   |
 
