@@ -178,6 +178,7 @@ def main(file_path, 'v1.1.1'):
 
 | Version | Description                                          | Related Images           | Release Date |
 |---------|------------------------------------------------------|--------------------------|--------------|
+| 2.0.8   | Refactor role page_access: change iam user_group permissions to alert_manager | identity:2.0.dev297 | 2025-11-24 |
 | 2.0.7   | Refactor data structure and fields for new CostReport service features          | cost-analysis:2.0.dev223 | 2025-06-02   |
 | 2.0.6   | Add "service_healthy" field at Alert-Manager.Service | alert-manager:2.0.dev72  | 2025-04-22   |
 
